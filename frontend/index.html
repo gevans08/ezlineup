@@ -4881,12 +4881,12 @@
                     <button class="modal-btn modal-btn-primary" id="stats-view-total-btn" onclick="setStatsViewMode('total')" style="padding: 6px 12px;">Totals</button>
                     <button class="modal-btn modal-btn-secondary" id="stats-view-per-game-btn" onclick="setStatsViewMode('per-game')" style="padding: 6px 12px;">Per Game</button>
                 </div>
-                <div style="overflow-x: auto;">
-                    <table class="lineup-table">
+                <div class="stats-table-wrapper">
+                    <table class="stats-table">
                         <thead>
                             <tr>
                                 <th class="player-name-col sortable-header" onclick="setStatsSort('name')">Player <span id="stats-sort-name"></span></th>
-                                <th class="sortable-header" onclick="setStatsSort('gamesPlayed')">GP <span id="stats-sort-gp"></span></th>
+                                <th class="number-col sortable-header" onclick="setStatsSort('gamesPlayed')">GP <span id="stats-sort-gp"></span></th>
                                 <th class="sortable-header" onclick="setStatsSort('points')">PTS <span id="stats-sort-pts"></span></th>
                                 <th class="sortable-header" onclick="setStatsSort('assists')">AST <span id="stats-sort-ast"></span></th>
                                 <th class="sortable-header" onclick="setStatsSort('rebounds')">REB <span id="stats-sort-reb"></span></th>
@@ -4900,8 +4900,8 @@
                 </div>
                 <div style="height: 24px;"></div>
                 <h3 style="margin: 0 0 10px; color: #004E89;">Playtime Summary</h3>
-                <div style="overflow-x: auto;">
-                    <table class="lineup-table">
+                <div class="stats-table-wrapper">
+                    <table class="stats-table">
                         <thead>
                             <tr>
                                 <th class="player-name-col sortable-header" onclick="setPlaytimeSort('name')">Player <span id="playtime-sort-name"></span></th>
@@ -11259,19 +11259,10 @@
             const games = gamesOverride || await StorageService.listGames();
             lastPlaytimeGamesCache = games;
 
-            // Initialize stats for all current players
+            // Initialize stats only for players who appear in games (not all players in roster)
             const playerStats = {};
             const playerGameDetails = {}; // Store game-by-game details
-            players.forEach(player => {
-                playerStats[player.id] = {
-                    name: player.name,
-                    star: player.star,
-                    totalQuarters: 0,
-                    gamesPlayed: 0,
-                    gamesAbsent: 0
-                };
-                playerGameDetails[player.id] = [];
-            });
+            const seenPlayerIds = new Set(); // Track which player IDs we've seen in games
 
             // Process each game
             games.forEach(game => {
@@ -11320,23 +11311,42 @@
 
                 // Update stats for players who were on the roster for this game
                 allPlayerIdsInGame.forEach(playerId => {
-                    const playerIdNum = parseInt(playerId);
-                    if (playerStats[playerIdNum]) {
-                        const quartersPlayed = playerQuartersInGame[playerId] || 0;
-                        playerStats[playerIdNum].totalQuarters += quartersPlayed;
+                    // Use string ID directly, don't convert to number
+                    const playerIdStr = String(playerId);
+                    seenPlayerIds.add(playerIdStr);
+                    
+                    // Initialize player stats if not already done
+                    if (!playerStats[playerIdStr]) {
+                        // Find player info from roster or game roster
+                        const playerFromRoster = players.find(p => String(p.id) === playerIdStr);
+                        const playerFromGame = gameRoster.find(p => String(p.id) === playerIdStr);
+                        const playerName = playerFromRoster ? playerFromRoster.name : (playerFromGame ? playerFromGame.name : `Player ${playerIdStr}`);
+                        const playerStar = playerFromRoster ? (playerFromRoster.star || false) : (playerFromGame ? (playerFromGame.star || false) : false);
                         
-                        if (presentPlayerIds.has(playerId)) {
-                            playerStats[playerIdNum].gamesPlayed++;
-                            
-                            // Store game details for this player
-                            playerGameDetails[playerIdNum].push({
-                                opponent: game.metadata.opponent || 'Unknown',
-                                date: game.metadata.gameDate || 'Unknown',
-                                quarters: playerPositionsByQuarter[playerId] || {q1: null, q2: null, q3: null, q4: null, total: 0}
-                            });
-                        } else if (absentPlayerIds.has(playerId)) {
-                            playerStats[playerIdNum].gamesAbsent++;
-                        }
+                        playerStats[playerIdStr] = {
+                            name: playerName,
+                            star: playerStar,
+                            totalQuarters: 0,
+                            gamesPlayed: 0,
+                            gamesAbsent: 0
+                        };
+                        playerGameDetails[playerIdStr] = [];
+                    }
+                    
+                    const quartersPlayed = playerQuartersInGame[playerIdStr] || 0;
+                    playerStats[playerIdStr].totalQuarters += quartersPlayed;
+                    
+                    if (presentPlayerIds.has(playerIdStr)) {
+                        playerStats[playerIdStr].gamesPlayed++;
+                        
+                        // Store game details for this player
+                        playerGameDetails[playerIdStr].push({
+                            opponent: game.metadata.opponent || 'Unknown',
+                            date: game.metadata.gameDate || 'Unknown',
+                            quarters: playerPositionsByQuarter[playerIdStr] || {q1: null, q2: null, q3: null, q4: null, total: 0}
+                        });
+                    } else if (absentPlayerIds.has(playerIdStr)) {
+                        playerStats[playerIdStr].gamesAbsent++;
                     }
                 });
             });
@@ -11362,9 +11372,10 @@
             });
 
             sortedPlayers.forEach((stat, index) => {
-                // Find player ID from stat - match by name and star status
-                const matchingPlayer = players.find(p => p.name === stat.name && p.star === stat.star);
-                const playerId = matchingPlayer ? matchingPlayer.id : null;
+                // Find player ID from stat - use the key from playerStats (which is the player ID string)
+                const playerId = Object.keys(playerStats).find(id => 
+                    playerStats[id].name === stat.name && playerStats[id].star === stat.star
+                );
                 const gameDetails = playerId ? (playerGameDetails[playerId] || []) : [];
                 
                 // Main row
@@ -11375,25 +11386,22 @@
                 // Player name with accordion icon
                 const nameCell = document.createElement('td');
                 nameCell.className = 'player-name-col';
-                nameCell.innerHTML = `<span class="accordion-icon">▶</span>${stat.name}${stat.star ? ' ⭐' : ''}`;
+                nameCell.innerHTML = `<span class="accordion-icon">▶</span>${escapeHtml(stat.name)}${stat.star ? ' ⭐' : ''}`;
                 row.appendChild(nameCell);
 
                 // Total quarters
                 const totalQuartersCell = document.createElement('td');
                 totalQuartersCell.textContent = stat.totalQuarters;
-                totalQuartersCell.style.textAlign = 'center';
                 row.appendChild(totalQuartersCell);
 
                 // Games played
                 const gamesPlayedCell = document.createElement('td');
                 gamesPlayedCell.textContent = stat.gamesPlayed;
-                gamesPlayedCell.style.textAlign = 'center';
                 row.appendChild(gamesPlayedCell);
 
                 // Games absent
                 const gamesAbsentCell = document.createElement('td');
                 gamesAbsentCell.textContent = stat.gamesAbsent;
-                gamesAbsentCell.style.textAlign = 'center';
                 row.appendChild(gamesAbsentCell);
 
                 // Average quarters per game
@@ -11404,8 +11412,6 @@
                 } else {
                     avgCell.textContent = '—';
                 }
-                avgCell.style.textAlign = 'center';
-                avgCell.className = 'total-cell';
                 row.appendChild(avgCell);
 
                 // Make row clickable
@@ -11530,25 +11536,10 @@
             if (!tbody) return;
             tbody.innerHTML = '';
 
-            // Initialize stats for all current players
+            // Initialize stats only for players who appear in games (not all players in roster)
             const statsTotals = {};
             const statsDetails = {};
             const statsGamesPlayedCounts = {};
-            players.forEach(player => {
-                statsTotals[player.id] = {
-                    id: player.id,
-                    name: player.name,
-                    star: player.star,
-                    points: 0,
-                    assists: 0,
-                    rebounds: 0,
-                    blocks: 0,
-                    steals: 0,
-                    turnovers: 0
-                };
-                statsDetails[player.id] = [];
-                statsGamesPlayedCounts[player.id] = 0;
-            });
 
             // Aggregate stats across games
             games.forEach(game => {
@@ -11563,10 +11554,12 @@
                 const statsPlayedMap = hasLineup ? {} : (game.metadata.statsPlayed || {});
 
                 const ensurePlayer = (pid, name, star) => {
-                    if (!statsTotals[pid]) {
-                        statsTotals[pid] = {
-                            id: pid,
-                            name: name || `Player ${pid}`,
+                    // Use string ID consistently
+                    const pidStr = String(pid);
+                    if (!statsTotals[pidStr]) {
+                        statsTotals[pidStr] = {
+                            id: pidStr,
+                            name: name || `Player ${pidStr}`,
                             star: !!star,
                             points: 0,
                             assists: 0,
@@ -11575,44 +11568,45 @@
                             steals: 0,
                             turnovers: 0
                         };
-                        statsDetails[pid] = [];
-                        statsGamesPlayedCounts[pid] = 0;
+                        statsDetails[pidStr] = [];
+                        statsGamesPlayedCounts[pidStr] = 0;
                     }
                 };
 
                 // Track games played based on lineup (plus overrides)
                 gameRoster.forEach(player => {
-                    const pid = player.id;
-                    ensurePlayer(pid, player.name, player.star);
-                    const lineupPlayed = (playedMap[String(pid)] || 0) > 0;
-                    const didPlay = lineupPlayed || !!statsPlayedMap[pid];
+                    const pidStr = String(player.id);
+                    ensurePlayer(pidStr, player.name, player.star);
+                    const lineupPlayed = (playedMap[pidStr] || 0) > 0;
+                    const didPlay = lineupPlayed || !!statsPlayedMap[pidStr] || !!statsPlayedMap[player.id];
                     if (didPlay) {
-                        statsGamesPlayedCounts[pid] += 1;
+                        statsGamesPlayedCounts[pidStr] += 1;
                     }
                 });
 
                 // Add stats totals and details
                 Object.keys(gameStats).forEach(playerId => {
-                    const pid = parseInt(playerId, 10);
+                    // Use string ID consistently
+                    const pidStr = String(playerId);
                     const stats = gameStats[playerId];
-                    const rosterPlayer = gameRoster.find(p => p.id === pid);
-                    ensurePlayer(pid, rosterPlayer ? rosterPlayer.name : `Player ${playerId}`, rosterPlayer ? rosterPlayer.star : false);
+                    const rosterPlayer = gameRoster.find(p => String(p.id) === pidStr);
+                    ensurePlayer(pidStr, rosterPlayer ? rosterPlayer.name : `Player ${pidStr}`, rosterPlayer ? rosterPlayer.star : false);
 
-                    statsTotals[pid].points += stats.points || 0;
-                    statsTotals[pid].assists += stats.assists || 0;
-                    statsTotals[pid].rebounds += stats.rebounds || 0;
-                    statsTotals[pid].blocks += stats.blocks || 0;
-                    statsTotals[pid].steals += stats.steals || 0;
-                    statsTotals[pid].turnovers += stats.turnovers || 0;
+                    statsTotals[pidStr].points += stats.points || 0;
+                    statsTotals[pidStr].assists += stats.assists || 0;
+                    statsTotals[pidStr].rebounds += stats.rebounds || 0;
+                    statsTotals[pidStr].blocks += stats.blocks || 0;
+                    statsTotals[pidStr].steals += stats.steals || 0;
+                    statsTotals[pidStr].turnovers += stats.turnovers || 0;
                 });
 
                 // Add detail rows for all roster players (show DNP games even with zero stats)
                 gameRoster.forEach(player => {
-                    const pid = player.id;
-                    ensurePlayer(pid, player.name, player.star);
-                    const lineupPlayed = (playedMap[String(pid)] || 0) > 0;
-                    const didPlay = lineupPlayed || !!statsPlayedMap[pid];
-                    const stats = gameStats[pid] || {
+                    const pidStr = String(player.id);
+                    ensurePlayer(pidStr, player.name, player.star);
+                    const lineupPlayed = (playedMap[pidStr] || 0) > 0;
+                    const didPlay = lineupPlayed || !!statsPlayedMap[pidStr] || !!statsPlayedMap[player.id];
+                    const stats = gameStats[pidStr] || gameStats[player.id] || {
                         points: 0,
                         assists: 0,
                         rebounds: 0,
@@ -11620,7 +11614,7 @@
                         steals: 0,
                         turnovers: 0
                     };
-                    statsDetails[pid].push({
+                    statsDetails[pidStr].push({
                         gameId: game.id,
                         opponent: opponent,
                         date: gameDate,
