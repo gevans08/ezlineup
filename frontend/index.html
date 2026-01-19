@@ -11693,12 +11693,12 @@
 
                 const nameCell = document.createElement('td');
                 nameCell.className = 'player-name-col';
-                nameCell.innerHTML = `<span class="accordion-icon">▶</span>${stat.name}${stat.star ? ' ⭐' : ''}`;
+                nameCell.innerHTML = `<span class="accordion-icon">▶</span>${escapeHtml(stat.name)}${stat.star ? ' ⭐' : ''}`;
                 row.appendChild(nameCell);
 
                 const gamesPlayedCell = document.createElement('td');
+                gamesPlayedCell.className = 'number-col';
                 gamesPlayedCell.textContent = gamesPlayed;
-                gamesPlayedCell.style.textAlign = 'center';
                 row.appendChild(gamesPlayedCell);
 
                 const formatDisplayValue = (value) => {
