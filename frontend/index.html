@@ -1425,8 +1425,8 @@
         #playtime-history-page .stats-table-wrapper {
             margin-left: calc(-50vw + 50% - 20px);
             margin-right: calc(-50vw + 50% - 20px);
-            width: calc(100vw - 40px);
-            padding-left: 20px;
+            width: calc(100vw - 20px);
+            padding-left: 0;
             padding-right: 20px;
         }
 
@@ -1434,8 +1434,8 @@
             #playtime-history-page .stats-table-wrapper {
                 margin-left: -20px;
                 margin-right: -20px;
-                width: calc(100vw - 40px);
-                padding-left: 20px;
+                width: calc(100vw - 20px);
+                padding-left: 0;
                 padding-right: 20px;
             }
         }
@@ -1540,17 +1540,10 @@
             margin-left: 0;
         }
 
-        /* On history page, ensure player column starts at absolute left edge (accounting for wrapper padding) */
+        /* On history page, ensure player column starts at absolute left edge */
         #playtime-history-page .stats-table th.player-name-col,
         #playtime-history-page .stats-table td.player-name-col {
-            left: 20px;
-        }
-
-        @media (max-width: 768px) {
-            #playtime-history-page .stats-table th.player-name-col,
-            #playtime-history-page .stats-table td.player-name-col {
-                left: 20px;
-            }
+            left: 0;
         }
 
         .stats-table th.player-name-col {
@@ -1570,6 +1563,12 @@
             z-index: 98;
             background: #004E89 !important;
             box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* On history page, adjust number-col position to account for no left padding */
+        #playtime-history-page .stats-table th.number-col,
+        #playtime-history-page .stats-table td.number-col {
+            left: 90px;
         }
 
         .stats-table th.number-col {
@@ -1638,7 +1637,7 @@
             /* Update number-col sticky position for history page on mobile */
             #playtime-history-page .stats-table th.number-col,
             #playtime-history-page .stats-table td.number-col {
-                left: 100px; /* 20px padding + 80px player column */
+                left: 80px; /* 80px player column (no padding) */
             }
 
             .stats-table th:not(.player-name-col):not(.number-col),
