@@ -7530,40 +7530,8 @@
             const container = document.getElementById('games-list-container');
             const games = await StorageService.listGames();
 
-            // Calculate team record
-            let wins = 0;
-            let losses = 0;
-            let ties = 0;
-            
-            games.forEach(game => {
-                const teamScore = game.metadata.teamScore !== null && game.metadata.teamScore !== undefined ? game.metadata.teamScore : null;
-                const opponentScore = game.metadata.opponentScore !== null && game.metadata.opponentScore !== undefined ? game.metadata.opponentScore : null;
-                
-                if (teamScore !== null && opponentScore !== null) {
-                    if (teamScore > opponentScore) {
-                        wins++;
-                    } else if (teamScore < opponentScore) {
-                        losses++;
-                    } else {
-                        ties++;
-                    }
-                }
-            });
-
-            // Display record
-            const recordDisplay = document.getElementById('team-record-display');
-            if (recordDisplay) {
-                const totalGames = wins + losses + ties;
-                if (totalGames > 0) {
-                    recordDisplay.textContent = `Record: ${wins}-${losses}-${ties}`;
-                } else {
-                    recordDisplay.textContent = '';
-                }
-            }
-
             if (games.length === 0) {
                 container.innerHTML = '<p style="color: #666; padding: 20px; text-align: center;">No saved games yet. Start a new game to create your first lineup!</p>';
-                if (recordDisplay) recordDisplay.textContent = '';
                 return;
             }
 
