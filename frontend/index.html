@@ -4526,11 +4526,10 @@
                 <div class="modal-header">
                     <h2>Exit Game</h2>
                 </div>
-                <p style="color: #333; margin-bottom: 20px; font-size: 1.1rem;">Do you want to save this game before exiting?</p>
-                <p style="color: #666; margin-bottom: 25px;">If you save, you can resume tracking stats later. If you don't save, this game will be deleted.</p>
+                <p style="color: #333; margin-bottom: 25px; font-size: 1.1rem;">Your game progress will be automatically saved. You can resume tracking stats later from the Games screen.</p>
                 <div class="modal-actions">
-                    <button type="button" class="modal-btn modal-btn-secondary" onclick="exitGameWithoutSaving()" style="background: #dc3545;">Don't Save</button>
-                    <button type="button" class="modal-btn modal-btn-primary" onclick="exitGameWithSave()">Save & Exit</button>
+                    <button type="button" class="modal-btn modal-btn-secondary" onclick="closeExitGameModal()">Cancel</button>
+                    <button type="button" class="modal-btn modal-btn-primary" onclick="exitGame()">Exit</button>
                 </div>
             </div>
         </div>
@@ -10509,21 +10508,10 @@
             document.getElementById('exit-game-modal').classList.remove('show');
         }
 
-        async function exitGameWithSave() {
+        async function exitGame() {
             closeExitGameModal();
-            // Save current state before exiting
+            // Auto-save current state before exiting
             await autoSaveGame();
-            navigateTo('games-list-page');
-        }
-
-        async function exitGameWithoutSaving() {
-            closeExitGameModal();
-            // Delete the game without saving
-            if (currentViewingGameId) {
-                await StorageService.deleteGame(currentViewingGameId);
-                currentViewingGame = null;
-                currentViewingGameId = null;
-            }
             navigateTo('games-list-page');
         }
 
