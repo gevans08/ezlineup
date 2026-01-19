@@ -7016,7 +7016,18 @@
             currentLineupData = quarters.map(q => q.map(slot => slot ? {...slot} : null));
             const editedCells = {}; // Track manually edited cells: {playerId-quarter: true}
 
-            const presentPlayers = players.filter(p => p.present);
+            // Get all player IDs that are actually in the lineup
+            const playersInLineup = new Set();
+            quarters.forEach(quarter => {
+                quarter.forEach(slot => {
+                    if (slot && slot.playerId) {
+                        playersInLineup.add(slot.playerId);
+                    }
+                });
+            });
+
+            // Only show players who are present AND in the lineup
+            const presentPlayers = players.filter(p => p.present && playersInLineup.has(p.id));
             const playerQuartersCount = {};
 
             presentPlayers.forEach((p, playerIndex) => {
