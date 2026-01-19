@@ -2358,7 +2358,7 @@
                 font-size: 1.8rem;
             }
 
-            /* Compact tabs */
+            /* Compact tabs - consistent across all tabs */
             .stats-tabs {
                 padding: 0;
             }
@@ -2368,10 +2368,10 @@
                 font-size: 0.8rem;
             }
 
-            /* Even more compact tabs on scoring tab */
-            #live-stats-page.scoring-tab-active .stats-tab {
-                padding: 6px 8px;
-                font-size: 0.75rem;
+            /* Ensure active tab has same padding/font as inactive tabs */
+            .stats-tab.active {
+                padding: 8px 10px;
+                font-size: 0.8rem;
             }
 
             /* Reduce tab content padding */
