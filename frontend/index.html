@@ -11711,42 +11711,36 @@
                 const pointsValue = getStatValue(stat, gamesPlayed, 'points');
                 const pointsCell = document.createElement('td');
                 pointsCell.textContent = formatDisplayValue(pointsValue);
-                pointsCell.style.textAlign = 'center';
                 applyLeaderClass(pointsCell, pointsValue, maxStats.points);
                 row.appendChild(pointsCell);
 
                 const assistsValue = getStatValue(stat, gamesPlayed, 'assists');
                 const assistsCell = document.createElement('td');
                 assistsCell.textContent = formatDisplayValue(assistsValue);
-                assistsCell.style.textAlign = 'center';
                 applyLeaderClass(assistsCell, assistsValue, maxStats.assists);
                 row.appendChild(assistsCell);
 
                 const reboundsValue = getStatValue(stat, gamesPlayed, 'rebounds');
                 const reboundsCell = document.createElement('td');
                 reboundsCell.textContent = formatDisplayValue(reboundsValue);
-                reboundsCell.style.textAlign = 'center';
                 applyLeaderClass(reboundsCell, reboundsValue, maxStats.rebounds);
                 row.appendChild(reboundsCell);
 
                 const blocksValue = getStatValue(stat, gamesPlayed, 'blocks');
                 const blocksCell = document.createElement('td');
                 blocksCell.textContent = formatDisplayValue(blocksValue);
-                blocksCell.style.textAlign = 'center';
                 applyLeaderClass(blocksCell, blocksValue, maxStats.blocks);
                 row.appendChild(blocksCell);
 
                 const stealsValue = getStatValue(stat, gamesPlayed, 'steals');
                 const stealsCell = document.createElement('td');
                 stealsCell.textContent = formatDisplayValue(stealsValue);
-                stealsCell.style.textAlign = 'center';
                 applyLeaderClass(stealsCell, stealsValue, maxStats.steals);
                 row.appendChild(stealsCell);
 
                 const turnoversValue = getStatValue(stat, gamesPlayed, 'turnovers');
                 const turnoversCell = document.createElement('td');
                 turnoversCell.textContent = formatDisplayValue(turnoversValue);
-                turnoversCell.style.textAlign = 'center';
                 applyLeaderClass(turnoversCell, turnoversValue, maxStats.turnovers, true);
                 row.appendChild(turnoversCell);
 
