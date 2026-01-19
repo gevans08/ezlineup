@@ -2339,11 +2339,6 @@
                 padding: 8px 12px;
             }
 
-            /* Add padding beneath navigation bar for scoring tab */
-            #live-stats-page.scoring-tab-active .live-stats-nav-row {
-                padding-bottom: 15px; /* 8px original + 7px = 15px */
-            }
-
             .exit-stats-btn {
                 font-size: 0.9rem;
                 padding: 3px 0;
@@ -2366,6 +2361,11 @@
             /* Compact tabs - consistent across all tabs */
             .stats-tabs {
                 padding: 0;
+            }
+
+            /* Add padding beneath stats tabs for scoring tab */
+            #live-stats-page.scoring-tab-active .stats-tabs {
+                padding-bottom: 7px;
             }
 
             .stats-tab {
