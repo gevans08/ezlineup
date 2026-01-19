@@ -244,6 +244,12 @@
             display: block;
         }
 
+        /* Ensure history page can scroll */
+        #playtime-history-page {
+            overflow-y: auto;
+            min-height: 100vh;
+        }
+
         .nav-button {
             background: white;
             color: #004E89;
@@ -11680,6 +11686,7 @@
             });
 
             const maxStats = sortedPlayers.reduce((acc, stat) => {
+                if (!stat || !stat.id) return acc;
                 const gamesPlayed = getGamesPlayed(stat.id);
                 acc.points = Math.max(acc.points, getStatValue(stat, gamesPlayed, 'points'));
                 acc.assists = Math.max(acc.assists, getStatValue(stat, gamesPlayed, 'assists'));
