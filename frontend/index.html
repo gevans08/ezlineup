@@ -2311,7 +2311,19 @@
 
         /* Mobile optimizations for Live Stats page - iPhone and small screens */
         @media (max-width: 480px) and (max-height: 900px) {
-            /* Reduce header padding */
+            /* Hide header title bar and nav row on scoring tab for mobile (keep scoreboard) */
+            #live-stats-page:has(#scoring-tab-content.active) .game-title-bar,
+            #live-stats-page:has(#scoring-tab-content.active) .live-stats-nav-row {
+                display: none;
+            }
+
+            /* Reduce scoreboard padding when header is hidden */
+            #live-stats-page:has(#scoring-tab-content.active) .simplified-scoreboard {
+                padding: 6px 12px;
+                margin-top: 0;
+            }
+
+            /* Reduce header padding (for other tabs) */
             .game-title-bar {
                 padding: 8px 12px;
                 font-size: 0.9rem;
@@ -2368,9 +2380,19 @@
                 padding: 12px;
             }
 
+            /* Even more compact for scoring tab */
+            #scoring-tab-content {
+                padding: 8px 12px;
+            }
+
             /* Compact team action sections */
             .team-actions-section {
-                margin-bottom: 15px;
+                margin-bottom: 8px;
+            }
+
+            /* Reduce space between opponent and home team sections */
+            .team-actions-section:first-of-type {
+                margin-bottom: 8px;
             }
 
             .team-actions-header {
@@ -2488,9 +2510,10 @@
                 padding-bottom: 80px; /* Add space at bottom for substitutions */
             }
 
-            /* Compact on-court section */
+            /* Compact on-court section - reduce space from home team scoring tools */
             .on-court-section {
-                margin-top: 10px;
+                margin-top: 8px;
+                padding: 12px;
             }
 
             .on-court-header {
