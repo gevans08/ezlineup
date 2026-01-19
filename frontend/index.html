@@ -699,6 +699,34 @@
             min-width: 200px;
         }
 
+        @media (max-width: 480px) {
+            .game-list-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .game-list-item .game-info-left {
+                width: 100%;
+            }
+
+            .game-list-item .game-info-right {
+                text-align: left;
+                min-width: auto;
+                width: 100%;
+            }
+
+            .game-list-item .game-score-container {
+                align-items: flex-start;
+            }
+
+            .game-list-item .game-meta {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+        }
+
         .game-list-item .game-score-container {
             display: flex;
             flex-direction: column;
@@ -7604,21 +7632,36 @@
                 // Click handler - resume if in progress, otherwise view
                 const clickHandler = isInProgress ? `resumeGame('${game.id}')` : `viewGame('${game.id}')`;
                 
+                // Extract status badge from scoreDisplay or create standalone
+                let statusBadgeDisplay = '';
+                if (isInProgress) {
+                    statusBadgeDisplay = `<div class="game-status-badge in-progress">In Progress - ${periodLabel}</div>`;
+                } else if (isFinished) {
+                    statusBadgeDisplay = `<div class="game-status-badge completed">Final</div>`;
+                }
+                
+                // Simplified score display (just the score, no status indicator since it's separate)
+                let simpleScoreDisplay = '';
+                if (teamScore !== null && opponentScore !== null) {
+                    const isWin = teamScore > opponentScore;
+                    const scoreClass = isWin ? ' win' : '';
+                    const emoji = isWin && isFinished ? ' 🏆' : '';
+                    simpleScoreDisplay = `<div class="game-score${scoreClass}"><span class="team-score">${teamScore}</span> - ${opponentScore}${emoji}</div>`;
+                }
+                
                 return `
                     <div class="game-list-item${isInProgress ? ' in-progress' : ''}">
                         <div class="game-info-left" style="flex: 1; cursor: pointer;" onclick="${clickHandler}">
-                            <h4>${escapeHtml(displayName)} ${statusBadge}</h4>
                             <div class="game-meta">
-                                <div>Opponent: ${escapeHtml(opponent)}</div>
-                                <div>Date: ${escapeHtml(gameDate)}</div>
-                                <div style="font-size: 0.8rem; color: #999; margin-top: 5px;">Saved: ${dateStr}</div>
+                                <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(opponent)}</div>
+                                <div style="color: #666; font-size: 0.9rem; margin-bottom: 4px;">${escapeHtml(gameDate)}</div>
+                                ${statusBadgeDisplay}
                             </div>
                         </div>
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            ${(scoreDisplay || commentsDisplay) ? `
+                            ${simpleScoreDisplay ? `
                             <div class="game-info-right">
-                                ${scoreDisplay}
-                                ${commentsDisplay}
+                                ${simpleScoreDisplay}
                             </div>
                             ` : ''}
                             <button class="delete-game-btn" onclick="deleteGame('${game.id}'); event.stopPropagation();" title="Delete game">
