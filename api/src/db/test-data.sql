@@ -98,3 +98,17 @@ VALUES (
     datetime('now'),
     datetime('now')
 );
+
+-- Game 2: Vienna vs Alexandria (Stats-only game from image)
+-- Date: 1/10/2026
+-- All 10 players participated (Playe: 1 for all)
+INSERT INTO games (id, team_id, name, lineup, metadata, created_at, updated_at)
+VALUES (
+    'game_test_002',
+    'team_test_002',  -- Vienna 6th team
+    'vs Alexandria - 1/10/2026',
+    NULL,  -- Stats-only game, no lineup
+    '{"opponent":"Alexandria","gameDate":"2026-01-10","teamScore":41,"opponentScore":46,"comments":"","playerCount":10,"statsOnly":true,"statsPlayed":{"p1":true,"p2":true,"p3":true,"p4":true,"p5":true,"p6":true,"p7":true,"p8":true,"p9":true,"p10":true},"roster":[{"id":"p1","name":"Jackson","number":"25","present":true,"star":false,"positions":[1,2]},{"id":"p2","name":"Drew","number":"4","present":true,"star":false,"positions":[1,2]},{"id":"p3","name":"Rowan","number":"14","present":true,"star":false,"positions":[3,4]},{"id":"p4","name":"Owen","number":"2","present":true,"star":false,"positions":[3,4]},{"id":"p5","name":"Shaan","number":"24","present":true,"star":false,"positions":[5]},{"id":"p6","name":"James","number":"1","present":true,"star":false,"positions":[1,2]},{"id":"p7","name":"Max","number":"30","present":true,"star":false,"positions":[3,4]},{"id":"p8","name":"Flynn","number":"5","present":true,"star":false,"positions":[3,4]},{"id":"p9","name":"Callen","number":"10","present":true,"star":false,"positions":[5]},{"id":"p10","name":"Leo","number":"22","present":true,"star":false,"positions":[1,2]}],"playerStats":{"p1":{"points":8,"assists":0,"rebounds":6,"blocks":2,"steals":4,"turnovers":1},"p2":{"points":4,"assists":1,"rebounds":0,"blocks":0,"steals":2,"turnovers":0},"p3":{"points":4,"assists":1,"rebounds":1,"blocks":0,"steals":4,"turnovers":0},"p4":{"points":11,"assists":1,"rebounds":5,"blocks":0,"steals":0,"turnovers":0},"p5":{"points":0,"assists":0,"rebounds":0,"blocks":0,"steals":1,"turnovers":0},"p6":{"points":2,"assists":0,"rebounds":1,"blocks":0,"steals":0,"turnovers":2},"p7":{"points":0,"assists":0,"rebounds":0,"blocks":0,"steals":0,"turnovers":0},"p8":{"points":5,"assists":0,"rebounds":0,"blocks":0,"steals":2,"turnovers":0},"p9":{"points":5,"assists":0,"rebounds":1,"blocks":0,"steals":0,"turnovers":0},"p10":{"points":2,"assists":0,"rebounds":1,"blocks":0,"steals":0,"turnovers":0}},"savedAt":"2026-01-10T00:00:00.000Z"}',
+    datetime('now'),
+    datetime('now')
+);
