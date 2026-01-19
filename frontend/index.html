@@ -244,9 +244,15 @@
             display: block;
         }
 
-        /* Ensure history page can scroll */
+        /* Ensure history page can scroll and contains table overflow */
         #playtime-history-page {
             overflow-y: visible;
+            overflow-x: hidden;
+        }
+
+        /* Ensure roster-section contains its children */
+        #playtime-history-page .roster-section {
+            overflow-x: hidden;
         }
 
         .nav-button {
@@ -1421,22 +1427,25 @@
             clip-path: inset(0);
         }
 
-        /* On history page, extend table wrapper to left edge of screen */
+        /* On history page, extend table wrapper to left edge of screen but contain to parent */
         #playtime-history-page .stats-table-wrapper {
             margin-left: calc(-50vw + 50% - 20px);
-            margin-right: calc(-50vw + 50% - 20px);
-            width: calc(100vw - 20px);
+            margin-right: 0;
+            width: calc(50vw - 50% + 100% + 20px);
             padding-left: 0;
             padding-right: 20px;
+            max-width: 100%;
+            overflow-x: auto;
         }
 
         @media (max-width: 768px) {
             #playtime-history-page .stats-table-wrapper {
                 margin-left: -20px;
-                margin-right: -20px;
-                width: calc(100vw - 20px);
+                margin-right: 0;
+                width: calc(100% + 20px);
                 padding-left: 0;
                 padding-right: 20px;
+                max-width: 100%;
             }
         }
 
