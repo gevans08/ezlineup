@@ -6632,19 +6632,40 @@
                 return;
             }
             
+            // Preserve present state if we're on the new game page (user may have unselected players)
+            const activePage = document.querySelector('.page.active');
+            const isNewGamePage = activePage && activePage.id === 'new-game-page';
+            const existingPresentState = {};
+            if (isNewGamePage && players.length > 0) {
+                // Save current present state before clearing
+                players.forEach(p => {
+                    existingPresentState[p.id] = p.present;
+                });
+            }
+            
             // Clear current players array first to prevent showing old team's data
             players = [];
             
             const savedRoster = await StorageService.loadRoster();
             if (savedRoster && savedRoster.players) {
                 // Use saved roster
-                players = savedRoster.players.map(p => ({
-                    ...p,
-                    number: p.number || '',
-                    present: p.present !== undefined ? p.present : true, // Always default to present for roster edit page
-                    star: p.star || false,
-                    positions: p.positions || (p.position ? [parseInt(p.position)] : [1,2,3,4,5]) // Ensure positions array exists
-                }));
+                players = savedRoster.players.map(p => {
+                    // On new game page, preserve existing present state if it exists, otherwise default to true
+                    let presentValue = true;
+                    if (isNewGamePage && existingPresentState.hasOwnProperty(p.id)) {
+                        presentValue = existingPresentState[p.id];
+                    } else if (p.present !== undefined) {
+                        presentValue = p.present;
+                    }
+                    
+                    return {
+                        ...p,
+                        number: p.number || '',
+                        present: presentValue,
+                        star: p.star || false,
+                        positions: p.positions || (p.position ? [parseInt(p.position)] : [1,2,3,4,5]) // Ensure positions array exists
+                    };
+                });
                 if (savedRoster.nextPlayerId) {
                     nextPlayerId = savedRoster.nextPlayerId;
                 } else {
