@@ -4280,28 +4280,6 @@
                 <button class="generate-btn" id="keep-stats-btn" onclick="startStatsOnlyGame()" style="background: #28a745;">📊 Keep Stats</button>
             </div>
             <div id="error-message" class="error-message"></div>
-
-            <div id="lineup-section" class="lineup-section">
-                <div class="action-buttons">
-                    <button class="save-btn" onclick="saveCurrentLineup()">💾 Save Game</button>
-                </div>
-                <h2 class="roster-title">Generated Lineup</h2>
-                <div style="overflow-x: auto;">
-                    <table class="lineup-table">
-                        <thead>
-                            <tr>
-                                <th class="player-name-col">Player</th>
-                                <th>Q1</th>
-                                <th>Q2</th>
-                                <th>Q3</th>
-                                <th>Q4</th>
-                                <th class="total-cell">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lineup-tbody"></tbody>
-                    </table>
-                </div>
-            </div>
         </div>
 
         <!-- View Game Page -->
@@ -4966,6 +4944,37 @@
                 <div class="modal-actions">
                     <button type="button" class="modal-btn modal-btn-secondary" onclick="closeSubstitutionDialog()">Cancel</button>
                     <button type="button" class="modal-btn modal-btn-primary" onclick="confirmSubstitution()" id="confirm-sub-btn">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generate Lineup Modal -->
+        <div id="generate-lineup-modal" class="modal-overlay" onclick="closeGenerateLineupModalIfOutside(event)">
+            <div class="modal-dialog" style="max-width: 95%; width: 95%;" onclick="event.stopPropagation()">
+                <button class="modal-close" onclick="closeGenerateLineupModal()">&times;</button>
+                <div class="modal-header">
+                    <h2>Generated Lineup</h2>
+                </div>
+                <div id="lineup-modal-error" class="error-message" style="margin: 0 0 15px;"></div>
+                <div style="overflow-x: auto; margin-bottom: 20px;">
+                    <table class="lineup-table">
+                        <thead>
+                            <tr>
+                                <th class="player-name-col">Player</th>
+                                <th>Q1</th>
+                                <th>Q2</th>
+                                <th>Q3</th>
+                                <th>Q4</th>
+                                <th class="total-cell">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lineup-modal-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="modal-actions" style="display: flex; gap: 10px; justify-content: center;">
+                    <button type="button" class="modal-btn modal-btn-secondary" onclick="regenerateLineup()">🔄 Generate Lineup</button>
+                    <button type="button" class="modal-btn modal-btn-primary" onclick="saveLineupFromModal()">💾 Save Lineup</button>
+                    <button type="button" class="modal-btn modal-btn-secondary" onclick="closeGenerateLineupModal()">Exit</button>
                 </div>
             </div>
         </div>
@@ -6782,11 +6791,6 @@
         }
 
         function generateLineup() {
-            const errorDiv = document.getElementById('error-message');
-            const lineupSection = document.getElementById('lineup-section');
-            errorDiv.classList.remove('show');
-            lineupSection.classList.remove('show');
-
             const presentPlayers = players.filter(p => p.present);
             
             if (presentPlayers.length < 5) {
@@ -6810,11 +6814,13 @@
                 return;
             }
 
-            // Display lineup regardless - violations are tracked for optimization
-            displayLineup(lineup.quarters);
-            lineupSection.classList.add('show');
+            // Display lineup in modal
+            displayLineupInModal(lineup.quarters);
             
             // Show warnings for violations, but still display the lineup
+            const modalErrorDiv = document.getElementById('lineup-modal-error');
+            modalErrorDiv.classList.remove('show');
+            
             if (lineup.violations > 0) {
                 let warningMsg = '';
                 const emptyDetails = [];
@@ -6836,13 +6842,44 @@
                 }
                 
                 if (warningMsg) {
-                    showError(warningMsg);
+                    modalErrorDiv.textContent = warningMsg;
+                    modalErrorDiv.classList.add('show');
                 }
-            } else {
-                // Clear any previous error messages
-                const errorDiv = document.getElementById('error-message');
-                errorDiv.classList.remove('show');
             }
+            
+            // Open the modal
+            const modal = document.getElementById('generate-lineup-modal');
+            modal.classList.add('show');
+        }
+
+        function regenerateLineup() {
+            generateLineup();
+        }
+
+        function closeGenerateLineupModal() {
+            const modal = document.getElementById('generate-lineup-modal');
+            modal.classList.remove('show');
+        }
+
+        function closeGenerateLineupModalIfOutside(event) {
+            if (event.target.id === 'generate-lineup-modal') {
+                closeGenerateLineupModal();
+            }
+        }
+
+        function saveLineupFromModal() {
+            if (!currentLineupData) {
+                const modalErrorDiv = document.getElementById('lineup-modal-error');
+                modalErrorDiv.textContent = 'No lineup to save. Please generate a lineup first.';
+                modalErrorDiv.classList.add('show');
+                return;
+            }
+            
+            // Close the modal first
+            closeGenerateLineupModal();
+            
+            // Use the existing save function
+            saveCurrentLineup();
         }
 
         function solveLineup(presentPlayers) {
@@ -7127,8 +7164,77 @@
             return bestSolution;
         }
 
+        function displayLineupInModal(quarters) {
+            const tbody = document.getElementById('lineup-modal-tbody');
+            tbody.innerHTML = '';
+            
+            // Store lineup data for editing
+            currentLineupData = quarters.map(q => q.map(slot => slot ? {...slot} : null));
+            const editedCells = {}; // Track manually edited cells: {playerId-quarter: true}
+
+            // Get all player IDs that are actually in the lineup
+            const playersInLineup = new Set();
+            quarters.forEach(quarter => {
+                quarter.forEach(slot => {
+                    if (slot && slot.playerId) {
+                        playersInLineup.add(slot.playerId);
+                    }
+                });
+            });
+
+            // Only show players who are present AND in the lineup
+            const presentPlayers = players.filter(p => p.present && playersInLineup.has(p.id));
+            const playerQuartersCount = {};
+
+            presentPlayers.forEach((p, playerIndex) => {
+                playerQuartersCount[p.id] = 0;
+                const row = document.createElement('tr');
+                
+                const nameCell = document.createElement('td');
+                nameCell.className = 'player-name-col';
+                nameCell.textContent = p.name + (p.star ? ' ⭐' : '');
+                row.appendChild(nameCell);
+
+                for (let q = 0; q < 4; q++) {
+                    const cell = document.createElement('td');
+                    const assignment = currentLineupData[q].find(slot => slot && slot.playerId === p.id);
+                    const cellKey = `${p.id}-${q}`;
+                    
+                    if (assignment) {
+                        cell.textContent = assignment.position;
+                        cell.className = 'position-cell' + (editedCells[cellKey] ? ' edited' : '');
+                        cell.dataset.playerId = p.id;
+                        cell.dataset.quarter = q;
+                        cell.dataset.position = assignment.position;
+                        playerQuartersCount[p.id]++;
+                    } else {
+                        cell.textContent = '—';
+                        cell.className = 'sit-cell' + (editedCells[cellKey] ? ' edited' : '');
+                        cell.dataset.playerId = p.id;
+                        cell.dataset.quarter = q;
+                        cell.dataset.position = '';
+                    }
+                    
+                    // Make cell editable
+                    cell.addEventListener('click', (e) => editCell(e.target, p, q, editedCells, playerQuartersCount, row));
+                    row.appendChild(cell);
+                }
+
+                const totalCell = document.createElement('td');
+                totalCell.className = 'total-cell';
+                totalCell.id = `total-${p.id}`;
+                totalCell.textContent = playerQuartersCount[p.id];
+                row.appendChild(totalCell);
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // Keep original displayLineup for view-game-page compatibility
         function displayLineup(quarters) {
             const tbody = document.getElementById('lineup-tbody');
+            if (!tbody) return; // If tbody doesn't exist (e.g., on new-game-page), just return
+            
             tbody.innerHTML = '';
             
             // Store lineup data for editing
