@@ -5417,10 +5417,11 @@
             const container = document.getElementById('team-selector-list');
             if (!container) return;
 
-            container.innerHTML = '';
+            container.innerHTML = '<div class="team-selector-item" style="padding: 20px; text-align: center; color: #999;">Loading teams...</div>';
 
-            const activeTeams = await TeamService.getActiveTeams();
-            const currentTeamId = TeamService.getCurrentTeamId();
+            try {
+                const activeTeams = await TeamService.getActiveTeams();
+                const currentTeamId = TeamService.getCurrentTeamId();
 
             if (activeTeams.length === 0) {
                 const emptyItem = document.createElement('div');
@@ -5441,12 +5442,15 @@
                 }
 
                 const sportIcon = getSportIcon(team.sport);
+                const teamName = team.teamName || team.name || 'Unnamed Team';
+                const league = team.league || 'N/A';
+                const season = team.season || 'N/A';
 
                 item.innerHTML = `
-                    <span class="team-card-sport" title="${escapeHtml(team.sport)}">${sportIcon}</span>
+                    <span class="team-card-sport" title="${escapeHtml(team.sport || '')}">${sportIcon}</span>
                     <div class="team-selector-item-info">
-                        <div class="team-selector-item-name">${escapeHtml(team.teamName)}</div>
-                        <div class="team-selector-item-details">${escapeHtml(team.league)} • ${escapeHtml(team.season)}</div>
+                        <div class="team-selector-item-name">${escapeHtml(teamName)}</div>
+                        <div class="team-selector-item-details">${escapeHtml(league)} • ${escapeHtml(season)}</div>
                     </div>
                 `;
 
@@ -5460,6 +5464,10 @@
 
                 container.appendChild(item);
             });
+            } catch (error) {
+                console.error('Error rendering team selector:', error);
+                container.innerHTML = '<div class="team-selector-item" style="padding: 20px; text-align: center; color: #dc3545;">Error loading teams. Please refresh the page.</div>';
+            }
         }
 
         function switchToTeamSelection() {
