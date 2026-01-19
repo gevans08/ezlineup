@@ -2509,8 +2509,13 @@
                 gap: 8px;
             }
 
+            /* Opponent section box includes header on mobile */
+            .team-actions-section:not(.scoring-team-section) .team-actions-header {
+                padding: 10px 14px 8px 14px;
+            }
+
             .opponent-actions {
-                padding: 12px;
+                padding: 8px 12px 12px 12px;
                 gap: 8px;
             }
 
@@ -2537,8 +2542,12 @@
                 gap: 7px;
             }
 
+            #live-stats-page.scoring-tab-active .team-actions-section:not(.scoring-team-section) .team-actions-header {
+                padding: 8px 12px 6px 12px;
+            }
+
             #live-stats-page.scoring-tab-active .opponent-actions {
-                padding: 10px;
+                padding: 6px 10px 10px 10px;
                 gap: 7px;
             }
 
@@ -2902,12 +2911,24 @@
             gap: 10px;
         }
 
-        .opponent-actions {
-            grid-template-columns: repeat(3, 1fr);
+        /* Make opponent section box include the header */
+        .team-actions-section:not(.scoring-team-section) {
             background: #f5f5f5;
-            padding: 15px;
             border-radius: 12px;
             border: 1px solid #e0e0e0;
+            padding: 0;
+        }
+
+        .team-actions-section:not(.scoring-team-section) .team-actions-header {
+            background: transparent;
+            border-radius: 12px 12px 0 0;
+            margin-bottom: 0;
+            padding: 12px 16px 10px 16px;
+        }
+
+        .opponent-actions {
+            grid-template-columns: repeat(3, 1fr);
+            padding: 10px 15px 15px 15px;
         }
 
         .scoring-actions {
