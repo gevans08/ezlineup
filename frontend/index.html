@@ -2311,16 +2311,15 @@
 
         /* Mobile optimizations for Live Stats page - iPhone and small screens */
         @media (max-width: 480px) and (max-height: 900px) {
-            /* Hide header title bar and nav row on scoring tab for mobile (keep scoreboard) */
-            #live-stats-page:has(#scoring-tab-content.active) .game-title-bar,
-            #live-stats-page:has(#scoring-tab-content.active) .live-stats-nav-row {
-                display: none;
+            /* Hide header completely on scoring tab for mobile */
+            #live-stats-page.scoring-tab-active .game-title-bar,
+            #live-stats-page.scoring-tab-active .live-stats-nav-row {
+                display: none !important;
             }
 
-            /* Reduce scoreboard padding when header is hidden */
-            #live-stats-page:has(#scoring-tab-content.active) .simplified-scoreboard {
-                padding: 6px 12px;
-                margin-top: 0;
+            /* Hide scoreboard on scoring tab to save space */
+            #live-stats-page.scoring-tab-active .simplified-scoreboard {
+                display: none !important;
             }
 
             /* Reduce header padding (for other tabs) */
@@ -2371,8 +2370,14 @@
             }
 
             .stats-tab {
-                padding: 10px 12px;
-                font-size: 0.85rem;
+                padding: 8px 10px;
+                font-size: 0.8rem;
+            }
+
+            /* Even more compact tabs on scoring tab */
+            #live-stats-page.scoring-tab-active .stats-tab {
+                padding: 6px 8px;
+                font-size: 0.75rem;
             }
 
             /* Reduce tab content padding */
@@ -2382,80 +2387,145 @@
 
             /* Even more compact for scoring tab */
             #scoring-tab-content {
-                padding: 8px 12px;
+                padding: 4px 8px;
             }
 
-            /* Compact team action sections */
+            #live-stats-page.scoring-tab-active #scoring-tab-content {
+                padding: 2px 6px;
+            }
+
+            /* Compact team action sections - very tight spacing */
             .team-actions-section {
-                margin-bottom: 8px;
+                margin-bottom: 4px;
             }
 
             /* Reduce space between opponent and home team sections */
             .team-actions-section:first-of-type {
-                margin-bottom: 8px;
+                margin-bottom: 4px;
+            }
+
+            /* Even more compact for scoring tab */
+            #live-stats-page.scoring-tab-active .team-actions-section {
+                margin-bottom: 3px;
             }
 
             .team-actions-header {
-                padding: 8px 12px;
-                margin-bottom: 10px;
-                font-size: 0.9rem;
+                padding: 6px 10px;
+                margin-bottom: 6px;
+                font-size: 0.85rem;
+            }
+
+            /* Even more compact for scoring tab */
+            #live-stats-page.scoring-tab-active .team-actions-header {
+                padding: 4px 8px;
+                margin-bottom: 4px;
+                font-size: 0.8rem;
             }
 
             .basketball-icon-small {
                 font-size: 0.9rem;
             }
 
-            /* Reduce button padding */
+            /* Reduce button padding - very compact */
             .action-btn {
-                padding: 10px 8px;
-                font-size: 0.8rem;
-                border-radius: 10px;
-            }
-
-            .action-btn-large {
-                padding: 16px 12px;
-                font-size: 0.95rem;
-                border-radius: 12px;
-            }
-
-            .action-btn-medium {
-                padding: 14px 12px;
-                font-size: 0.9rem;
-                border-radius: 11px;
-            }
-
-            .action-btn-small {
                 padding: 8px 6px;
                 font-size: 0.75rem;
                 border-radius: 8px;
             }
 
-            /* Reduce grid gaps */
+            .action-btn-large {
+                padding: 12px 10px;
+                font-size: 0.85rem;
+                border-radius: 10px;
+            }
+
+            .action-btn-medium {
+                padding: 10px 8px;
+                font-size: 0.8rem;
+                border-radius: 9px;
+            }
+
+            .action-btn-small {
+                padding: 6px 4px;
+                font-size: 0.7rem;
+                border-radius: 6px;
+            }
+
+            /* Even more compact for scoring tab */
+            #live-stats-page.scoring-tab-active .action-btn {
+                padding: 6px 4px;
+                font-size: 0.7rem;
+            }
+
+            #live-stats-page.scoring-tab-active .action-btn-large {
+                padding: 10px 8px;
+                font-size: 0.8rem;
+            }
+
+            #live-stats-page.scoring-tab-active .action-btn-medium {
+                padding: 8px 6px;
+                font-size: 0.75rem;
+            }
+
+            #live-stats-page.scoring-tab-active .action-btn-small {
+                padding: 5px 3px;
+                font-size: 0.65rem;
+            }
+
+            /* Reduce grid gaps - very tight */
             .action-buttons-grid {
-                gap: 6px;
+                gap: 4px;
             }
 
             .opponent-actions {
-                padding: 10px;
-                gap: 6px;
+                padding: 6px;
+                gap: 4px;
             }
 
             .scoring-actions {
-                gap: 8px;
+                gap: 4px;
             }
 
             .scoring-team-section {
-                padding: 10px;
+                padding: 6px;
             }
 
             .action-column-left,
             .action-column-right,
             .action-column-center {
-                gap: 6px;
+                gap: 4px;
             }
 
             .action-grid-small {
-                gap: 6px;
+                gap: 4px;
+            }
+
+            /* Even tighter for scoring tab */
+            #live-stats-page.scoring-tab-active .action-buttons-grid {
+                gap: 3px;
+            }
+
+            #live-stats-page.scoring-tab-active .opponent-actions {
+                padding: 4px;
+                gap: 3px;
+            }
+
+            #live-stats-page.scoring-tab-active .scoring-actions {
+                gap: 3px;
+            }
+
+            #live-stats-page.scoring-tab-active .scoring-team-section {
+                padding: 4px;
+            }
+
+            #live-stats-page.scoring-tab-active .action-column-left,
+            #live-stats-page.scoring-tab-active .action-column-right,
+            #live-stats-page.scoring-tab-active .action-column-center {
+                gap: 3px;
+            }
+
+            #live-stats-page.scoring-tab-active .action-grid-small {
+                gap: 3px;
             }
 
             /* Reduce period selector size */
@@ -2507,13 +2577,19 @@
 
             /* Ensure substitutions section is visible */
             #scoring-tab-content {
-                padding-bottom: 80px; /* Add space at bottom for substitutions */
+                padding-bottom: 10px; /* Minimal bottom padding */
             }
 
             /* Compact on-court section - reduce space from home team scoring tools */
             .on-court-section {
-                margin-top: 8px;
-                padding: 12px;
+                margin-top: 4px;
+                padding: 8px;
+            }
+
+            /* Even tighter for scoring tab */
+            #live-stats-page.scoring-tab-active .on-court-section {
+                margin-top: 2px;
+                padding: 6px;
             }
 
             .on-court-header {
@@ -5446,6 +5522,12 @@
                         document.documentElement.scrollTop = 0;
                         document.body.scrollTop = 0;
                         targetPage.scrollTop = 0;
+                        // Set scoring-tab-active class if scoring tab is active
+                        const scoringTabContent = document.getElementById('scoring-tab-content');
+                        const liveStatsPage = document.getElementById('live-stats-page');
+                        if (scoringTabContent && scoringTabContent.classList.contains('active')) {
+                            liveStatsPage.classList.add('scoring-tab-active');
+                        }
                     }, 100);
                 }
             }
@@ -7484,7 +7566,7 @@
             renderRosterTab();
             
             // Set default tab to scoring
-            switchStatsTab('scoring');
+            await switchStatsTab('scoring');
         }
 
         async function viewGame(gameId) {
@@ -8161,7 +8243,7 @@
             }
             
             // Set default tab to scoring
-            switchStatsTab('scoring');
+            await switchStatsTab('scoring');
 
             // Initialize player stats for all present players
             const roster = currentViewingGame.metadata.roster || [];
@@ -8381,6 +8463,14 @@
             // Update tab content
             document.querySelectorAll('.stats-tab-content').forEach(content => content.classList.remove('active'));
             document.getElementById(`${tabName}-tab-content`).classList.add('active');
+
+            // Add/remove class for scoring tab to hide header on mobile
+            const liveStatsPage = document.getElementById('live-stats-page');
+            if (tabName === 'scoring') {
+                liveStatsPage.classList.add('scoring-tab-active');
+            } else {
+                liveStatsPage.classList.remove('scoring-tab-active');
+            }
 
             if (tabName === 'stats') {
                 await renderStatsTab();
