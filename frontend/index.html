@@ -2586,9 +2586,9 @@
                 padding-bottom: 10px; /* Minimal bottom padding */
             }
 
-            /* Compact on-court section - reduce space from home team scoring tools */
+            /* Compact on-court section - add slight padding from scoring tools */
             .on-court-section {
-                margin-top: 4px;
+                margin-top: 8px;
                 padding: 6px 8px;
             }
 
@@ -2614,9 +2614,9 @@
                 padding: 1px 5px;
             }
 
-            /* Even tighter for scoring tab */
+            /* Even tighter for scoring tab but keep some spacing */
             #live-stats-page.scoring-tab-active .on-court-section {
-                margin-top: 2px;
+                margin-top: 6px;
                 padding: 4px 6px;
             }
 
@@ -9195,6 +9195,11 @@
 
         function renderOnCourtPlayers() {
             const container = document.getElementById('on-court-players');
+            if (!container) return;
+            
+            // Save the substitution button before clearing
+            const subButton = container.querySelector('.inline-sub-btn');
+            
             container.innerHTML = '';
             
             const roster = currentViewingGame.metadata.roster || [];
@@ -9225,6 +9230,21 @@
                 `;
                 container.appendChild(playerDiv);
             });
+
+            // Re-add the substitution button if it existed, or create it if it doesn't
+            let subBtn = subButton;
+            if (!subBtn) {
+                subBtn = document.createElement('button');
+                subBtn.className = 'swap-players-btn compact-sub-btn inline-sub-btn';
+                subBtn.onclick = () => openSubstitutionDialog();
+                subBtn.title = 'Substitute Players';
+                subBtn.innerHTML = `
+                    <span class="swap-icon">⇄</span>
+                    <span class="sub-btn-text">Sub</span>
+                    <span class="player-count-badge" id="on-court-count">${onCourtPlayers.length}</span>
+                `;
+            }
+            container.appendChild(subBtn);
 
             // Update count badge
             const countElement = document.getElementById('on-court-count');
