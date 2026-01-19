@@ -2534,14 +2534,20 @@
 
             /* Compact on-court players section */
             .on-court-players {
-                gap: 8px;
-                margin-bottom: 4px;
+                gap: 6px;
+                margin-bottom: 0;
+            }
+
+            /* Inline sub button styling */
+            .inline-sub-btn {
+                margin-left: auto;
+                flex-shrink: 0;
             }
 
             /* Even more compact for scoring tab */
             #live-stats-page.scoring-tab-active .on-court-players {
-                gap: 6px;
-                margin-bottom: 2px;
+                gap: 4px;
+                margin-bottom: 0;
             }
 
             .on-court-player {
@@ -2586,19 +2592,8 @@
                 padding: 6px 8px;
             }
 
-            /* Hide header text, show only compact button */
+            /* Hide header completely - button is now inline with players */
             .on-court-header {
-                margin-bottom: 6px;
-                justify-content: center;
-                padding: 0;
-            }
-
-            /* Hide any text spans in header, keep only button */
-            .on-court-header > span:not(.player-count-badge):not(.sub-btn-text):not(.swap-icon) {
-                display: none !important;
-            }
-
-            .on-court-header .player-count:not(.player-count-badge) {
                 display: none !important;
             }
 
@@ -2623,10 +2618,6 @@
             #live-stats-page.scoring-tab-active .on-court-section {
                 margin-top: 2px;
                 padding: 4px 6px;
-            }
-
-            #live-stats-page.scoring-tab-active .on-court-header {
-                margin-bottom: 4px;
             }
 
             #live-stats-page.scoring-tab-active .compact-sub-btn {
@@ -3336,6 +3327,12 @@
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* Inline substitution button - appears with players */
+        .inline-sub-btn {
+            align-self: center;
         }
 
         .on-court-player {
@@ -4335,15 +4332,13 @@
 
                 <!-- On the Court Section -->
                 <div class="on-court-section">
-                    <div class="on-court-header">
-                        <button class="swap-players-btn compact-sub-btn" onclick="openSubstitutionDialog()" title="Substitute Players">
+                    <div class="on-court-players" id="on-court-players">
+                        <!-- Players will be dynamically added here -->
+                        <button class="swap-players-btn compact-sub-btn inline-sub-btn" onclick="openSubstitutionDialog()" title="Substitute Players">
                             <span class="swap-icon">⇄</span>
                             <span class="sub-btn-text">Sub</span>
                             <span class="player-count-badge" id="on-court-count">5</span>
                         </button>
-                    </div>
-                    <div class="on-court-players" id="on-court-players">
-                        <!-- Players will be dynamically added here -->
                     </div>
                 </div>
             </div>
