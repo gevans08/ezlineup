@@ -82,15 +82,19 @@ VALUES (
 );
 
 -- ============================================================================
--- OPTIONAL: Add sample games (uncomment and edit if you want test games)
+-- SAMPLE GAMES
 -- ============================================================================
--- INSERT INTO games (id, team_id, name, lineup, metadata, created_at, updated_at)
--- VALUES (
---     'game_test_001',
---     'team_test_001',
---     'vs Red Hawks - Jan 20, 2026',
---     NULL,  -- No lineup yet
---     '{"opponent":"Red Hawks","date":"2026-01-20","teamScore":0,"opponentScore":0}',
---     datetime('now'),
---     datetime('now')
--- );
+
+-- Game 1: Vienna vs Mclean (Stats-only game from image)
+-- Date: 12/20/2025
+-- All 10 players participated (Playe: 1 for all)
+INSERT INTO games (id, team_id, name, lineup, metadata, created_at, updated_at)
+VALUES (
+    'game_test_001',
+    'team_test_002',  -- Vienna 6th team
+    'vs Mclean - 12/20/2025',
+    NULL,  -- Stats-only game, no lineup
+    '{"opponent":"Mclean","gameDate":"2025-12-20","teamScore":null,"opponentScore":null,"comments":"","playerCount":10,"statsOnly":true,"statsPlayed":{"p1":true,"p2":true,"p3":true,"p4":true,"p5":true,"p6":true,"p7":true,"p8":true,"p9":true,"p10":true},"roster":[{"id":"p1","name":"Jackson","number":"25","present":true,"star":false,"positions":[1,2]},{"id":"p2","name":"Drew","number":"4","present":true,"star":false,"positions":[1,2]},{"id":"p3","name":"Rowan","number":"14","present":true,"star":false,"positions":[3,4]},{"id":"p4","name":"Owen","number":"2","present":true,"star":false,"positions":[3,4]},{"id":"p5","name":"Shaan","number":"24","present":true,"star":false,"positions":[5]},{"id":"p6","name":"James","number":"1","present":true,"star":false,"positions":[1,2]},{"id":"p7","name":"Max","number":"30","present":true,"star":false,"positions":[3,4]},{"id":"p8","name":"Flynn","number":"5","present":true,"star":false,"positions":[3,4]},{"id":"p9","name":"Callen","number":"10","present":true,"star":false,"positions":[5]},{"id":"p10","name":"Leo","number":"22","present":true,"star":false,"positions":[1,2]}],"playerStats":{"p1":{"points":12,"assists":0,"rebounds":8,"blocks":3,"steals":0,"turnovers":0},"p2":{"points":9,"assists":0,"rebounds":1,"blocks":1,"steals":2,"turnovers":1},"p3":{"points":5,"assists":0,"rebounds":5,"blocks":0,"steals":1,"turnovers":2},"p4":{"points":0,"assists":0,"rebounds":7,"blocks":1,"steals":2,"turnovers":0},"p5":{"points":4,"assists":0,"rebounds":1,"blocks":0,"steals":2,"turnovers":1},"p6":{"points":2,"assists":0,"rebounds":11,"blocks":0,"steals":4,"turnovers":4},"p7":{"points":5,"assists":0,"rebounds":1,"blocks":0,"steals":2,"turnovers":3},"p8":{"points":0,"assists":0,"rebounds":0,"blocks":0,"steals":0,"turnovers":0},"p9":{"points":0,"assists":0,"rebounds":2,"blocks":0,"steals":0,"turnovers":0},"p10":{"points":0,"assists":0,"rebounds":0,"blocks":0,"steals":0,"turnovers":0}},"savedAt":"2025-12-20T00:00:00.000Z"}',
+    datetime('now'),
+    datetime('now')
+);
