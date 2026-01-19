@@ -2645,6 +2645,22 @@
                 padding: 8px 10px;
             }
 
+            /* On-court section as part of scoring team box */
+            .scoring-team-section {
+                border-radius: 12px 12px 0 0;
+                border-bottom: none;
+                margin-bottom: 0;
+            }
+
+            .scoring-team-section + .on-court-section {
+                background: rgba(0, 78, 137, 0.03);
+                margin-top: 0;
+                padding: 0 12px 12px 12px;
+                border-radius: 0 0 12px 12px;
+                border: 1px solid #e0e0e0;
+                border-top: none;
+            }
+
             /* Hide header completely - button is now inline with players */
             .on-court-header {
                 display: none !important;
@@ -2671,6 +2687,17 @@
             #live-stats-page.scoring-tab-active .on-court-section {
                 margin-top: 8px;
                 padding: 6px 8px;
+            }
+
+            #live-stats-page.scoring-tab-active .scoring-team-section {
+                border-radius: 12px 12px 0 0;
+                border-bottom: none;
+            }
+
+            #live-stats-page.scoring-tab-active .scoring-team-section + .on-court-section {
+                margin-top: 0;
+                padding: 0 10px 10px 10px;
+                border-radius: 0 0 12px 12px;
             }
 
             #live-stats-page.scoring-tab-active .compact-sub-btn {
@@ -2941,7 +2968,20 @@
         .scoring-team-section {
             background: rgba(0, 78, 137, 0.03);
             padding: 15px;
-            border-radius: 12px;
+            border-radius: 12px 12px 0 0;
+            border: 1px solid #e0e0e0;
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        /* Make on-court-section part of the scoring team box */
+        .scoring-team-section + .on-court-section {
+            background: rgba(0, 78, 137, 0.03);
+            margin-top: 0;
+            padding: 0 15px 15px 15px;
+            border-radius: 0 0 12px 12px;
+            border: 1px solid #e0e0e0;
+            border-top: none;
         }
 
         .action-column-left,
