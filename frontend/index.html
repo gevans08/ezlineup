@@ -1421,6 +1421,25 @@
             clip-path: inset(0);
         }
 
+        /* On history page, extend table wrapper to left edge of screen */
+        #playtime-history-page .stats-table-wrapper {
+            margin-left: calc(-50vw + 50% - 20px);
+            margin-right: calc(-50vw + 50% - 20px);
+            width: calc(100vw - 40px);
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        @media (max-width: 768px) {
+            #playtime-history-page .stats-table-wrapper {
+                margin-left: -20px;
+                margin-right: -20px;
+                width: calc(100vw - 40px);
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
+
         .stats-table {
             width: 100%;
             min-width: 600px;
@@ -1519,6 +1538,19 @@
             box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
             /* Ensure no content appears to the left */
             margin-left: 0;
+        }
+
+        /* On history page, ensure player column starts at absolute left edge (accounting for wrapper padding) */
+        #playtime-history-page .stats-table th.player-name-col,
+        #playtime-history-page .stats-table td.player-name-col {
+            left: 20px;
+        }
+
+        @media (max-width: 768px) {
+            #playtime-history-page .stats-table th.player-name-col,
+            #playtime-history-page .stats-table td.player-name-col {
+                left: 20px;
+            }
         }
 
         .stats-table th.player-name-col {
