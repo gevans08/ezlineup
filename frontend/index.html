@@ -2311,14 +2311,8 @@
 
         /* Mobile optimizations for Live Stats page - iPhone and small screens */
         @media (max-width: 480px) and (max-height: 900px) {
-            /* Hide header completely on scoring tab for mobile */
-            #live-stats-page.scoring-tab-active .game-title-bar,
-            #live-stats-page.scoring-tab-active .live-stats-nav-row {
-                display: none !important;
-            }
-
-            /* Hide scoreboard on scoring tab to save space */
-            #live-stats-page.scoring-tab-active .simplified-scoreboard {
+            /* Hide only the gray title bar with hamburger menu on scoring tab for mobile */
+            #live-stats-page.scoring-tab-active .game-title-bar {
                 display: none !important;
             }
 
