@@ -6163,8 +6163,8 @@
                 }
             });
 
-            // Get roster count - use async loadRoster
-            const roster = await loadRoster();
+            // Get roster count - use StorageService.loadRoster directly
+            const roster = await StorageService.loadRoster();
             const playerCount = roster && roster.players ? roster.players.length : 0;
 
             // Calculate total points scored from finished games
