@@ -48,6 +48,17 @@ jobs:
       - name: Install Wrangler
         run: npm install -g wrangler
 
+      - name: Create Pages project if it doesn't exist
+        run: |
+          # Try to create the project (will fail silently if it already exists)
+          curl -X POST \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"name":"ezlineup","production_branch":"main"}' \
+            || echo "Project may already exist, continuing..."
+        continue-on-error: true
+
       - name: Deploy to Cloudflare Pages
         run: wrangler pages deploy ./frontend --project-name=ezlineup
         env:
