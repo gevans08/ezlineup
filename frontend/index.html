@@ -11371,11 +11371,25 @@
                 return playtimeSort.dir === 'asc' ? aVal - bVal : bVal - aVal;
             });
 
-            sortedPlayers.forEach((stat, index) => {
-                // Find player ID from stat - use the key from playerStats (which is the player ID string)
-                const playerId = Object.keys(playerStats).find(id => 
-                    playerStats[id].name === stat.name && playerStats[id].star === stat.star
-                );
+            // Convert playerStats to array with IDs preserved
+            const playersWithIds = Object.keys(playerStats).map(id => ({
+                ...playerStats[id],
+                id: id
+            }));
+            
+            const sortedPlayersWithIds = playersWithIds.sort((a, b) => {
+                const aVal = getPlaytimeValue(a);
+                const bVal = getPlaytimeValue(b);
+                if (playtimeSort.key === 'name') {
+                    return playtimeSort.dir === 'asc'
+                        ? aVal.localeCompare(bVal)
+                        : bVal.localeCompare(aVal);
+                }
+                return playtimeSort.dir === 'asc' ? aVal - bVal : bVal - aVal;
+            });
+
+            sortedPlayersWithIds.forEach((stat, index) => {
+                const playerId = stat.id;
                 const gameDetails = playerId ? (playerGameDetails[playerId] || []) : [];
                 
                 // Main row
