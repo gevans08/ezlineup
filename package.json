@@ -1,0 +1,13 @@
+{
+  "name": "ezlineup",
+  "version": "1.0.0",
+  "description": "Simple app to make a youth bball lineup and keep track of stats",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve . -l 3000"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

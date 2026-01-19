@@ -1,0 +1,10 @@
+name = "ezlineup-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# D1 Database binding
+# After running `wrangler d1 create ezlineup-db`, update the database_id below
+[[d1_databases]]
+binding = "DB"
+database_name = "ezlineup-db"
+database_id = "082ffde9-5f3d-4cbc-89e4-d4472280ca96"
