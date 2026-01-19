@@ -11691,7 +11691,8 @@
             }, { points: 0, assists: 0, rebounds: 0, blocks: 0, steals: 0, turnovers: 0 });
 
             const applyLeaderClass = (cell, value, maxValue, isTurnover = false) => {
-                if (maxValue > 0 && value === maxValue) {
+                // Use Math.abs to handle floating point precision issues
+                if (maxValue > 0 && Math.abs(value - maxValue) < 0.01) {
                     cell.classList.add(isTurnover ? 'stat-leader-red' : 'stat-leader-green');
                 }
             };
