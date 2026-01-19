@@ -701,9 +701,12 @@
 
         @media (max-width: 480px) {
             .game-list-item {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 12px;
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .game-list-item > div {
+                align-items: center !important;
             }
 
             .game-list-item .game-info-left {
@@ -714,11 +717,6 @@
                 display: flex;
                 flex-direction: column;
                 gap: 6px;
-            }
-
-            .game-list-item .game-meta > div:first-child {
-                flex-direction: column !important;
-                align-items: flex-start !important;
             }
 
             .game-list-item .game-score {
@@ -762,7 +760,7 @@
         }
 
         .delete-game-btn {
-            background: #dc3545;
+            background: #ff6b7a;
             color: white;
             border: none;
             border-radius: 6px;
@@ -772,10 +770,11 @@
             transition: all 0.2s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             flex-shrink: 0;
+            align-self: center;
         }
 
         .delete-game-btn:hover {
-            background: #c82333;
+            background: #ff5252;
             transform: scale(1.1);
             box-shadow: 0 3px 6px rgba(0,0,0,0.2);
         }
@@ -7651,18 +7650,16 @@
                 
                 return `
                     <div class="game-list-item${isInProgress ? ' in-progress' : ''}">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                             <div class="game-info-left" style="flex: 1; cursor: pointer;" onclick="${clickHandler}">
                                 <div class="game-meta">
-                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-                                        <div style="font-weight: 600;">${escapeHtml(opponent)}</div>
-                                        ${simpleScoreDisplay ? `<div style="margin-left: 10px;">${simpleScoreDisplay}</div>` : ''}
-                                    </div>
+                                    ${simpleScoreDisplay ? `<div style="margin-bottom: 6px;">${simpleScoreDisplay}</div>` : ''}
+                                    <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(opponent)}</div>
                                     <div style="color: #666; font-size: 0.9rem; margin-bottom: 4px;">${escapeHtml(gameDate)}</div>
                                     ${statusBadgeDisplay}
                                 </div>
                             </div>
-                            <button class="delete-game-btn" onclick="deleteGame('${game.id}'); event.stopPropagation();" title="Delete game" style="margin-left: 10px;">
+                            <button class="delete-game-btn" onclick="deleteGame('${game.id}'); event.stopPropagation();" title="Delete game" style="margin-left: 15px; align-self: center;">
                                 🗑️
                             </button>
                         </div>
