@@ -1635,6 +1635,12 @@
                 width: 35px;
             }
 
+            /* Update number-col sticky position for history page on mobile */
+            #playtime-history-page .stats-table th.number-col,
+            #playtime-history-page .stats-table td.number-col {
+                left: 100px; /* 20px padding + 80px player column */
+            }
+
             .stats-table th:not(.player-name-col):not(.number-col),
             .stats-table td:not(.player-name-col):not(.number-col) {
                 min-width: 45px;
