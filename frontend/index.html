@@ -2534,8 +2534,14 @@
 
             /* Compact on-court players section */
             .on-court-players {
-                gap: 10px;
-                margin-bottom: 10px;
+                gap: 8px;
+                margin-bottom: 4px;
+            }
+
+            /* Even more compact for scoring tab */
+            #live-stats-page.scoring-tab-active .on-court-players {
+                gap: 6px;
+                margin-bottom: 2px;
             }
 
             .on-court-player {
@@ -2577,13 +2583,56 @@
             /* Compact on-court section - reduce space from home team scoring tools */
             .on-court-section {
                 margin-top: 4px;
-                padding: 8px;
+                padding: 6px 8px;
+            }
+
+            /* Hide header text, show only compact button */
+            .on-court-header {
+                margin-bottom: 6px;
+                justify-content: center;
+                padding: 0;
+            }
+
+            /* Hide any text spans in header, keep only button */
+            .on-court-header > span:not(.player-count-badge):not(.sub-btn-text):not(.swap-icon) {
+                display: none !important;
+            }
+
+            .on-court-header .player-count:not(.player-count-badge) {
+                display: none !important;
+            }
+
+            /* Compact substitution button */
+            .compact-sub-btn {
+                width: auto !important;
+                height: 32px !important;
+                padding: 6px 10px !important;
+                font-size: 0.75rem !important;
+            }
+
+            .sub-btn-text {
+                font-size: 0.75rem;
+            }
+
+            .player-count-badge {
+                font-size: 0.7rem;
+                padding: 1px 5px;
             }
 
             /* Even tighter for scoring tab */
             #live-stats-page.scoring-tab-active .on-court-section {
                 margin-top: 2px;
-                padding: 6px;
+                padding: 4px 6px;
+            }
+
+            #live-stats-page.scoring-tab-active .on-court-header {
+                margin-bottom: 4px;
+            }
+
+            #live-stats-page.scoring-tab-active .compact-sub-btn {
+                height: 28px !important;
+                padding: 5px 8px !important;
+                font-size: 0.7rem !important;
             }
 
             .on-court-header {
@@ -3228,6 +3277,34 @@
             padding: 4px 10px;
             border-radius: 12px;
             font-size: 0.9rem;
+        }
+
+        /* Compact substitution button - replaces header on mobile */
+        .compact-sub-btn {
+            width: auto !important;
+            height: auto !important;
+            border-radius: 8px !important;
+            padding: 8px 12px !important;
+            display: flex !important;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .sub-btn-text {
+            font-size: 0.85rem;
+        }
+
+        .player-count-badge {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            min-width: 20px;
+            text-align: center;
         }
 
         .swap-players-btn {
@@ -4259,10 +4336,10 @@
                 <!-- On the Court Section -->
                 <div class="on-court-section">
                     <div class="on-court-header">
-                        <span>On the Court</span>
-                        <span class="player-count" id="on-court-count">5</span>
-                        <button class="swap-players-btn" onclick="openSubstitutionDialog()" title="Substitute Players">
+                        <button class="swap-players-btn compact-sub-btn" onclick="openSubstitutionDialog()" title="Substitute Players">
                             <span class="swap-icon">⇄</span>
+                            <span class="sub-btn-text">Sub</span>
+                            <span class="player-count-badge" id="on-court-count">5</span>
                         </button>
                     </div>
                     <div class="on-court-players" id="on-court-players">
@@ -9154,7 +9231,11 @@
                 container.appendChild(playerDiv);
             });
 
-            document.getElementById('on-court-count').textContent = onCourtPlayers.length;
+            // Update count badge
+            const countElement = document.getElementById('on-court-count');
+            if (countElement) {
+                countElement.textContent = onCourtPlayers.length;
+            }
         }
 
         // Substitution state
