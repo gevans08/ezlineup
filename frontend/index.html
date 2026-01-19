@@ -4504,25 +4504,54 @@
         
         const TeamService = {
             // Get all teams (active and archived)
-            getAllTeams() {
-                try {
-                    const stored = localStorage.getItem('teams');
-                    return stored ? JSON.parse(stored) : {};
-                } catch (error) {
-                    console.error('Error loading teams:', error);
-                    return {};
+            async getAllTeams() {
+                // Check if using API backend
+                if (StorageService.backend === 'api') {
+                    try {
+                        const response = await fetch(`${StorageService.apiBaseUrl}/api/teams`);
+                        if (!response.ok) return {};
+                        const result = await response.json();
+                        // Convert array to object format expected by rest of code
+                        const teamsObj = {};
+                        (result.teams || []).forEach(team => {
+                            teamsObj[team.id] = {
+                                id: team.id,
+                                name: team.name,
+                                teamName: team.name,  // Alias for compatibility
+                                sport: team.sport,
+                                league: team.league || '',
+                                season: team.season || '',
+                                archived: team.archived === 1,
+                                createdAt: team.created_at,
+                                archivedAt: team.archived === 1 ? team.updated_at : null
+                            };
+                        });
+                        return teamsObj;
+                    } catch (error) {
+                        console.error('Error loading teams from API:', error);
+                        return {};
+                    }
+                } else {
+                    // localStorage backend
+                    try {
+                        const stored = localStorage.getItem('teams');
+                        return stored ? JSON.parse(stored) : {};
+                    } catch (error) {
+                        console.error('Error loading teams:', error);
+                        return {};
+                    }
                 }
             },
             
             // Get active teams only
-            getActiveTeams() {
-                const allTeams = this.getAllTeams();
+            async getActiveTeams() {
+                const allTeams = await this.getAllTeams();
                 return Object.values(allTeams).filter(team => !team.archived);
             },
             
             // Get archived teams
-            getArchivedTeams() {
-                const allTeams = this.getAllTeams();
+            async getArchivedTeams() {
+                const allTeams = await this.getAllTeams();
                 return Object.values(allTeams).filter(team => team.archived);
             },
             
@@ -4595,10 +4624,10 @@
             },
             
             // Get current team
-            getCurrentTeam() {
+            async getCurrentTeam() {
                 const teamId = this.getCurrentTeamId();
                 if (!teamId) return null;
-                const teams = this.getAllTeams();
+                const teams = await this.getAllTeams();
                 return teams[teamId] || null;
             }
         };
@@ -4787,7 +4816,7 @@
                         return { success: false, error: 'No team selected' };
                     }
                     
-                    const response = await fetch(`${this.apiBaseUrl}/api/teams/${teamId}/games`, {
+                    const response = await fetch(`${this.apiBaseUrl}/api/teams/${encodeURIComponent(teamId)}/games`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -4816,7 +4845,7 @@
                     const teamId = TeamService.getCurrentTeamId();
                     if (!teamId) return null;
                     
-                    const response = await fetch(`${this.apiBaseUrl}/api/teams/${teamId}/games/${gameId}`);
+                    const response = await fetch(`${this.apiBaseUrl}/api/teams/${encodeURIComponent(teamId)}/games/${encodeURIComponent(gameId)}`);
                     
                     if (!response.ok) return null;
                     
@@ -4841,7 +4870,7 @@
                     const teamId = TeamService.getCurrentTeamId();
                     if (!teamId) return [];
                     
-                    const response = await fetch(`${this.apiBaseUrl}/api/teams/${teamId}/games`);
+                    const response = await fetch(`${this.apiBaseUrl}/api/teams/${encodeURIComponent(teamId)}/games`);
                     
                     if (!response.ok) return [];
                     
@@ -4867,7 +4896,7 @@
                         return { success: false, error: 'No team selected' };
                     }
                     
-                    const response = await fetch(`${this.apiBaseUrl}/api/teams/${teamId}/games/${gameId}`, {
+                    const response = await fetch(`${this.apiBaseUrl}/api/teams/${encodeURIComponent(teamId)}/games/${encodeURIComponent(gameId)}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -4896,7 +4925,7 @@
                         return { success: false, error: 'No team selected' };
                     }
                     
-                    const response = await fetch(`${this.apiBaseUrl}/api/teams/${teamId}/games/${gameId}`, {
+                    const response = await fetch(`${this.apiBaseUrl}/api/teams/${encodeURIComponent(teamId)}/games/${encodeURIComponent(gameId)}`, {
                         method: 'DELETE'
                     });
                     
@@ -5010,7 +5039,7 @@
                         return { success: false, error: 'No team selected' };
                     }
                     
-                    const response = await fetch(`${this.apiBaseUrl}/api/teams/${teamId}/roster`, {
+                    const response = await fetch(`${this.apiBaseUrl}/api/teams/${encodeURIComponent(teamId)}/roster`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -5035,7 +5064,7 @@
                     const teamId = TeamService.getCurrentTeamId();
                     if (!teamId) return null;
                     
-                    const response = await fetch(`${this.apiBaseUrl}/api/teams/${teamId}/roster`);
+                    const response = await fetch(`${this.apiBaseUrl}/api/teams/${encodeURIComponent(teamId)}/roster`);
                     
                     if (!response.ok) return null;
                     
@@ -5169,20 +5198,20 @@
                 
                 // Load page-specific content
                 if (pageId === 'team-selection-page') {
-                    renderTeamSelection();
+                    renderTeamSelection().catch(err => console.error('Error rendering team selection:', err));
                 } else if (pageId === 'team-info-page') {
-                    renderTeamInfo();
+                    renderTeamInfo().catch(err => console.error('Error rendering team info:', err));
                 } else if (pageId === 'edit-roster-page') {
                     // Ensure roster is loaded for current team before rendering
                     loadRoster().then(() => {
-                        renderRosterEdit();
+                        renderRosterEdit().catch(err => console.error('Error rendering roster:', err));
                     });
                 } else if (pageId === 'games-list-page') {
                     renderGamesList();
                 } else if (pageId === 'new-game-page') {
                     // Ensure roster is loaded for current team before rendering
                     loadRoster().then(() => {
-                        renderGameRoster();
+                        renderGameRoster().catch(err => console.error('Error rendering game roster:', err));
                         const keepStatsBtn = document.getElementById('keep-stats-btn');
                         if (keepStatsBtn) {
                             keepStatsBtn.style.display = forceUpdateGame ? 'none' : 'inline-block';
@@ -5209,13 +5238,13 @@
         // TEAM MANAGEMENT FUNCTIONS
         // ============================================================================
         
-        function renderTeamSelection() {
+        async function renderTeamSelection() {
             const container = document.getElementById('teams-list-container');
             const archivedContainer = document.getElementById('archived-teams-list');
             const archivedSection = document.getElementById('archived-teams-section');
             
-            const activeTeams = TeamService.getActiveTeams();
-            const archivedTeams = TeamService.getArchivedTeams();
+            const activeTeams = await TeamService.getActiveTeams();
+            const archivedTeams = await TeamService.getArchivedTeams();
             
             // Render active teams
             container.innerHTML = '';
@@ -5227,17 +5256,18 @@
                     const card = document.createElement('div');
                     card.className = 'team-card';
                     card.onclick = () => selectTeam(team.id);
+                    const teamName = team.name || team.teamName || 'Unnamed Team';
                     card.innerHTML = `
                         <div class="team-card-header">
-                            <h3 class="team-card-name">${escapeHtml(team.teamName)}</h3>
+                            <h3 class="team-card-name">${escapeHtml(teamName)}</h3>
                             <span class="team-card-sport" title="${escapeHtml(team.sport)}">${sportIcon}</span>
                         </div>
                         <div class="team-card-info">
                             <div class="team-card-info-item">
-                                <span class="team-card-info-label">League:</span> ${escapeHtml(team.league)}
+                                <span class="team-card-info-label">League:</span> ${escapeHtml(team.league || 'N/A')}
                             </div>
                             <div class="team-card-info-item">
-                                <span class="team-card-info-label">Season:</span> ${escapeHtml(team.season)}
+                                <span class="team-card-info-label">Season:</span> ${escapeHtml(team.season || 'N/A')}
                             </div>
                         </div>
                         <button class="team-card-archive-btn" onclick="event.stopPropagation(); archiveTeam('${team.id}')">Archive</button>
@@ -5256,17 +5286,18 @@
                     card.className = 'team-card';
                     card.style.opacity = '0.7';
                     card.onclick = () => selectTeam(team.id);
+                    const teamName = team.name || team.teamName || 'Unnamed Team';
                     card.innerHTML = `
                         <div class="team-card-header">
-                            <h3 class="team-card-name">${escapeHtml(team.teamName)}</h3>
+                            <h3 class="team-card-name">${escapeHtml(teamName)}</h3>
                             <span class="team-card-sport" title="${escapeHtml(team.sport)}">${sportIcon}</span>
                         </div>
                         <div class="team-card-info">
                             <div class="team-card-info-item">
-                                <span class="team-card-info-label">League:</span> ${escapeHtml(team.league)}
+                                <span class="team-card-info-label">League:</span> ${escapeHtml(team.league || 'N/A')}
                             </div>
                             <div class="team-card-info-item">
-                                <span class="team-card-info-label">Season:</span> ${escapeHtml(team.season)}
+                                <span class="team-card-info-label">Season:</span> ${escapeHtml(team.season || 'N/A')}
                             </div>
                             <div class="team-card-info-item" style="color: #999; font-style: italic;">
                                 Archived
@@ -5323,6 +5354,7 @@
         }
         
         function getSportIcon(sport) {
+            if (!sport) return '⚽';
             switch(sport.toLowerCase()) {
                 case 'basketball':
                     return '🏀';
@@ -5333,15 +5365,16 @@
             }
         }
         
-        function updateTeamDisplay() {
-            const currentTeam = TeamService.getCurrentTeam();
+        async function updateTeamDisplay() {
+            const currentTeam = await TeamService.getCurrentTeam();
             const teamDisplay = document.getElementById('current-team-display');
             const navTitle = document.getElementById('nav-title');
             
             // Update team switcher button
             if (teamDisplay && currentTeam) {
                 const sportIcon = getSportIcon(currentTeam.sport);
-                teamDisplay.innerHTML = `${sportIcon} ${currentTeam.teamName}`;
+                const teamName = currentTeam.name || currentTeam.teamName || 'Unnamed Team';
+                teamDisplay.innerHTML = `${sportIcon} ${teamName}`;
             } else if (teamDisplay) {
                 teamDisplay.textContent = 'Select Team';
             }
@@ -5350,7 +5383,8 @@
             const navTitleText = document.getElementById('nav-title-text');
             if (navTitleText && currentTeam) {
                 const sportIcon = getSportIcon(currentTeam.sport);
-                navTitleText.innerHTML = `${sportIcon} ${currentTeam.teamName}`;
+                const teamName = currentTeam.name || currentTeam.teamName || 'Unnamed Team';
+                navTitleText.innerHTML = `${sportIcon} ${teamName}`;
             } else if (navTitleText) {
                 navTitleText.textContent = 'Select a Team';
             }
@@ -5358,7 +5392,7 @@
             // Update team selector dropdown if it's open
             const dropdown = document.getElementById('team-selector-dropdown');
             if (dropdown && dropdown.classList.contains('show')) {
-                renderTeamSelectorDropdown();
+                renderTeamSelectorDropdown().catch(err => console.error('Error rendering team selector:', err));
             }
         }
         
@@ -5367,7 +5401,7 @@
             if (dropdown) {
                 dropdown.classList.toggle('show');
                 if (dropdown.classList.contains('show')) {
-                    renderTeamSelectorDropdown();
+                    renderTeamSelectorDropdown().catch(err => console.error('Error rendering team selector:', err));
                 }
             }
         }
@@ -5379,13 +5413,13 @@
             }
         }
 
-        function renderTeamSelectorDropdown() {
+        async function renderTeamSelectorDropdown() {
             const container = document.getElementById('team-selector-list');
             if (!container) return;
 
             container.innerHTML = '';
 
-            const activeTeams = TeamService.getActiveTeams();
+            const activeTeams = await TeamService.getActiveTeams();
             const currentTeamId = TeamService.getCurrentTeamId();
 
             if (activeTeams.length === 0) {
@@ -5616,11 +5650,11 @@
         // TEAM INFO PAGE
         // ============================================================================
 
-        function renderTeamInfo() {
+        async function renderTeamInfo() {
             const container = document.getElementById('team-info-container');
             if (!container) return;
 
-            const currentTeam = TeamService.getCurrentTeam();
+            const currentTeam = await TeamService.getCurrentTeam();
             if (!currentTeam) {
                 container.innerHTML = '<p style="text-align: center; color: #666;">Please select a team first.</p>';
                 return;
@@ -5656,13 +5690,14 @@
             });
 
             const sportIcon = getSportIcon(currentTeam.sport);
+            const teamName = currentTeam.name || currentTeam.teamName || 'Unnamed Team';
 
             container.innerHTML = `
                 <div class="team-info-header">
                     <div class="team-info-icon">${sportIcon}</div>
                     <div class="team-info-title">
-                        <h3>${escapeHtml(currentTeam.teamName)}</h3>
-                        <p>${escapeHtml(currentTeam.league)} • ${escapeHtml(currentTeam.season)}</p>
+                        <h3>${escapeHtml(teamName)}</h3>
+                        <p>${escapeHtml(currentTeam.league || 'N/A')} • ${escapeHtml(currentTeam.season || 'N/A')}</p>
                     </div>
                 </div>
 
@@ -5731,13 +5766,14 @@
             `;
         }
 
-        function archiveCurrentTeam() {
-            const currentTeam = TeamService.getCurrentTeam();
+        async function archiveCurrentTeam() {
+            const currentTeam = await TeamService.getCurrentTeam();
             if (!currentTeam) return;
             
+            const teamName = currentTeam.name || currentTeam.teamName || 'this team';
             showConfirmModal({
                 title: 'Archive Team',
-                message: `Are you sure you want to archive "${currentTeam.teamName}"?`,
+                message: `Are you sure you want to archive "${teamName}"?`,
                 submessage: 'You can unarchive it later from the team selection screen.',
                 confirmText: 'Archive',
                 cancelText: 'Cancel',
@@ -5746,7 +5782,7 @@
                     if (result.success) {
                         TeamService.setCurrentTeamId(null);
                         currentTeamId = null;
-                        updateTeamDisplay();
+                        updateTeamDisplay().catch(err => console.error('Error updating team display:', err));
                         navigateTo('team-selection-page');
                     }
                 }
@@ -5757,19 +5793,21 @@
         // ROSTER RENDERING - Different views for different pages
         // ============================================================================
 
-        function renderRosterEdit() {
+        async function renderRosterEdit() {
             const container = document.getElementById('roster-edit-container');
+            // Save scroll position before clearing
+            const scrollPosition = window.scrollY || document.documentElement.scrollTop;
             container.innerHTML = '';
             
             // Check current team sport
-            const currentTeam = TeamService.getCurrentTeam();
+            const currentTeam = await TeamService.getCurrentTeam();
             if (!currentTeam) {
                 container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Please select a team first.</p>';
                 return;
             }
             
             // Show placeholder for Lacrosse
-            if (currentTeam.sport.toLowerCase() === 'lacrosse') {
+            if (currentTeam.sport && currentTeam.sport.toLowerCase() === 'lacrosse') {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 60px 20px; color: #666;">
                         <div style="font-size: 4rem; margin-bottom: 20px;">🥍</div>
@@ -5780,56 +5818,128 @@
                 return;
             }
 
+            // Ensure players array exists and is initialized
+            if (!players || !Array.isArray(players)) {
+                players = [];
+            }
+
+            if (players.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No players in roster. Add players below.</p>';
+            }
+
             players.forEach(player => {
                 const card = document.createElement('div');
                 card.className = 'player-card';
+                card.setAttribute('data-player-id', player.id); // Add data attribute for easy lookup
                 
                 const isEditing = editingPlayerId === player.id;
+                
+                // Ensure positions array exists
+                if (!player.positions || !Array.isArray(player.positions)) {
+                    player.positions = [1,2,3,4,5]; // Default to all positions
+                }
                 
                 card.innerHTML = `
                     <div class="player-header">
                         ${isEditing 
-                            ? `<input type="text" class="player-name-input" value="${player.name}" 
-                                     onblur="savePlayerName(${player.id}, this.value)" 
-                                     onkeypress="if(event.key==='Enter') { savePlayerName(${player.id}, this.value); this.blur(); }"
+                            ? `<input type="text" class="player-name-input" value="${escapeHtml(player.name || '')}" 
+                                     onblur="savePlayerName('${player.id}', this.value)" 
+                                     onkeypress="if(event.key==='Enter') { savePlayerName('${player.id}', this.value); this.blur(); }"
                                      autofocus>` 
                             : `<span class="player-name">
-                                 ${player.name} ${player.star ? '⭐' : ''}
+                                 ${escapeHtml(player.name || '')} ${player.star ? '⭐' : ''}
                                </span>
-                               <button class="edit-btn" onclick="editPlayerName(${player.id})">✏️</button>`
+                               <button class="edit-btn" onclick="editPlayerName('${player.id}')">✏️</button>`
                         }
                         <div style="display: flex; align-items: center; gap: 6px;">
                             <span style="font-size: 0.85rem; color: #666;">#</span>
-                            <input type="text" value="${player.number ?? ''}" 
-                                   onblur="savePlayerNumber(${player.id}, this.value)"
+                            <input type="text" value="${escapeHtml(player.number || '')}" 
+                                   onblur="savePlayerNumber('${player.id}', this.value)"
                                    inputmode="numeric"
                                    maxlength="3"
                                    style="width: 48px; padding: 4px 6px; border: 1px solid #ccc; border-radius: 6px; text-align: center;">
                         </div>
-                        <button class="star-btn ${player.star ? 'active' : ''}" onclick="toggleStar(${player.id})">
+                        <button class="star-btn ${player.star ? 'active' : ''}" onclick="toggleStar('${player.id}')">
                             ⭐
                         </button>
                     </div>
                     <div class="positions">
                         ${[1,2,3,4,5].map(pos => `
-                            <button class="position-btn ${player.positions.includes(pos) ? 'active' : ''}" 
-                                    onclick="togglePosition(${player.id}, ${pos})">
+                            <button class="position-btn ${player.positions && player.positions.includes(pos) ? 'active' : ''}" 
+                                    data-position="${pos}"
+                                    onclick="togglePosition('${player.id}', ${pos})">
                                 ${pos}
                             </button>
                         `).join('')}
                     </div>
                     <div class="player-actions">
-                        <button class="remove-btn" onclick="removePlayer(${player.id})">Remove</button>
+                        <button class="remove-btn" onclick="removePlayer('${player.id}')">Remove</button>
                     </div>
                 `;
                 
                 container.appendChild(card);
             });
+            
+            // Restore scroll position after render (only if we saved it)
+            if (typeof scrollPosition !== 'undefined') {
+                requestAnimationFrame(() => {
+                    window.scrollTo(0, scrollPosition);
+                });
+            }
+        }
+        
+        // Helper function to update just the position buttons for a specific player
+        function updatePlayerPositions(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+            
+            const playerCard = document.querySelector(`[data-player-id="${playerId}"]`);
+            if (!playerCard) return;
+            
+            const positionsContainer = playerCard.querySelector('.positions');
+            if (!positionsContainer) return;
+            
+            // Update position buttons
+            [1,2,3,4,5].forEach(pos => {
+                const btn = positionsContainer.querySelector(`[data-position="${pos}"]`);
+                if (btn) {
+                    if (player.positions && player.positions.includes(pos)) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                }
+            });
+        }
+        
+        // Helper function to update just the star button for a specific player
+        function updatePlayerStar(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+            
+            const playerCard = document.querySelector(`[data-player-id="${playerId}"]`);
+            if (!playerCard) return;
+            
+            const starBtn = playerCard.querySelector('.star-btn');
+            if (starBtn) {
+                if (player.star) {
+                    starBtn.classList.add('active');
+                } else {
+                    starBtn.classList.remove('active');
+                }
+            }
+            
+            // Also update star icon in name
+            const playerName = playerCard.querySelector('.player-name');
+            if (playerName) {
+                const nameText = player.name || '';
+                playerName.innerHTML = `${escapeHtml(nameText)} ${player.star ? '⭐' : ''}`;
+            }
         }
 
-        function renderGameRoster() {
+        async function renderGameRoster() {
             // Check current team sport
-            const currentTeam = TeamService.getCurrentTeam();
+            const currentTeam = await TeamService.getCurrentTeam();
             if (!currentTeam) {
                 const container = document.getElementById('game-roster-container');
                 container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Please select a team first.</p>';
@@ -5837,7 +5947,7 @@
             }
             
             // Show placeholder for Lacrosse
-            if (currentTeam.sport.toLowerCase() === 'lacrosse') {
+            if (currentTeam.sport && currentTeam.sport.toLowerCase() === 'lacrosse') {
                 const container = document.getElementById('game-roster-container');
                 container.innerHTML = `
                     <div style="text-align: center; padding: 60px 20px; color: #666;">
@@ -5906,9 +6016,9 @@
         }
 
 
-        function editPlayerName(playerId) {
+        async function editPlayerName(playerId) {
             editingPlayerId = playerId;
-            renderRosterEdit();
+            await renderRosterEdit();
         }
 
         async function savePlayerName(playerId, newName) {
@@ -5928,7 +6038,7 @@
                 }
             }
             editingPlayerId = null;
-            renderRosterEdit();
+            await renderRosterEdit();
             saveRoster();
         }
 
@@ -5940,11 +6050,12 @@
             saveRoster();
         }
 
-        function toggleStar(playerId) {
+        async function toggleStar(playerId) {
             const player = players.find(p => p.id === playerId);
             if (player) {
                 player.star = !player.star;
-                renderRosterEdit();
+                // Update only the star button for this player (no full re-render)
+                updatePlayerStar(playerId);
                 saveRoster(); // Save roster (affects future games only)
             }
         }
@@ -5956,14 +6067,19 @@
                 // Update the appropriate view
                 const activePage = document.querySelector('.page.active');
                 if (activePage && activePage.id === 'new-game-page') {
-                    renderGameRoster();
+                    renderGameRoster().catch(err => console.error('Error rendering game roster:', err));
                 }
             }
         }
 
-        function togglePosition(playerId, position) {
+        async function togglePosition(playerId, position) {
             const player = players.find(p => p.id === playerId);
             if (player) {
+                // Ensure positions array exists
+                if (!player.positions || !Array.isArray(player.positions)) {
+                    player.positions = [1,2,3,4,5];
+                }
+                
                 const index = player.positions.indexOf(position);
                 if (index > -1) {
                     player.positions.splice(index, 1);
@@ -5971,7 +6087,9 @@
                     player.positions.push(position);
                     player.positions.sort();
                 }
-                renderRosterEdit();
+                
+                // Update only the position buttons for this player (no full re-render)
+                updatePlayerPositions(playerId);
                 saveRoster(); // Save roster (affects future games only)
             }
         }
@@ -5987,15 +6105,15 @@
                 confirmText: 'Remove',
                 confirmStyle: 'danger',
                 cancelText: 'Cancel',
-                onConfirm: () => {
+                onConfirm: async () => {
                     players = players.filter(p => p.id !== playerId);
-                    renderRosterEdit();
+                    await renderRosterEdit();
                     saveRoster();
                 }
             });
         }
 
-        function addPlayer() {
+        async function addPlayer() {
             players.push({
                 id: nextPlayerId++,
                 name: `Player ${nextPlayerId - 10}`,
@@ -6004,7 +6122,7 @@
                 star: false,
                 positions: [1,2,3,4,5]
             });
-            renderRosterEdit();
+            await renderRosterEdit();
             saveRoster();
         }
 
@@ -6027,7 +6145,7 @@
         // Load roster from storage
         async function loadRoster() {
             // Check if we have a team selected
-            const currentTeam = TeamService.getCurrentTeam();
+            const currentTeam = await TeamService.getCurrentTeam();
             if (!currentTeam) {
                 players = [];
                 nextPlayerId = 1;
@@ -6043,10 +6161,19 @@
                 players = savedRoster.players.map(p => ({
                     ...p,
                     number: p.number || '',
-                    present: true // Always default to present for roster edit page
+                    present: p.present !== undefined ? p.present : true, // Always default to present for roster edit page
+                    star: p.star || false,
+                    positions: p.positions || (p.position ? [parseInt(p.position)] : [1,2,3,4,5]) // Ensure positions array exists
                 }));
                 if (savedRoster.nextPlayerId) {
                     nextPlayerId = savedRoster.nextPlayerId;
+                } else {
+                    // Calculate nextPlayerId from existing players
+                    const maxId = Math.max(...players.map(p => {
+                        const idStr = String(p.id || '');
+                        return parseInt(idStr.replace('p', '')) || 0;
+                    }), 0);
+                    nextPlayerId = maxId + 1;
                 }
             } else {
                 // No saved roster for this team, start with empty array
@@ -6686,7 +6813,7 @@
                 const savedGame = await StorageService.loadGame(result.id);
                 currentViewingGame = savedGame;
                 currentViewingGameId = result.id;
-                initializeLiveStats();
+                await initializeLiveStats();
                 navigateTo('live-stats-page');
             } else {
                 showError(`Failed to start game: ${result.error || 'Unknown error'}`);
@@ -6775,7 +6902,7 @@
                 liveGameStats.fouledOut = [];
 
                 // Now initialize (will skip starting lineup modal since onCourt is already set)
-                initializeLiveStats();
+                await initializeLiveStats();
 
                 // Navigate to live stats
                 navigateTo('live-stats-page');
@@ -6902,7 +7029,7 @@
                     const savedGame = await StorageService.loadGame(result.id);
                     currentViewingGame = savedGame;
                     currentViewingGameId = result.id;
-                    initializeLiveStats();
+                    await initializeLiveStats();
                     navigateTo('live-stats-page');
                 } else {
                     showError(`Game saved: ${gameName}`);
@@ -7078,6 +7205,7 @@
                 opponentRebounds: savedStats.opponentRebounds || 0,
                 opponentTurnovers: savedStats.opponentTurnovers || 0,
                 substitutionHistory: [...(savedStats.substitutionHistory || [])],
+                substitutions: [...(savedStats.substitutions || [])],
                 fouledOut: [...(savedStats.fouledOut || [])],
                 teamStats: savedStats.teamStats || { points: 0, fouls: 0, rebounds: 0, turnovers: 0, timeouts: 0 },
                 opponentStats: savedStats.opponentStats || { points: 0, fouls: 0, rebounds: 0, turnovers: 0 },
@@ -7127,7 +7255,7 @@
             updatePeriodDisplay();
             updateScoreboard();
             renderOnCourtPlayers();
-            updateTeamNames();
+            await updateTeamNames();
             renderRosterTab();
             
             // Set default tab to scoring
@@ -7737,7 +7865,7 @@
         let pendingFreeThrow = null; // Track pending free throw: {playerId, count, shots: []}
 
         // Initialize Live Stats Page
-        function initializeLiveStats() {
+        async function initializeLiveStats() {
             if (!currentViewingGame) return;
 
             // Reset period to 1 for new games (will be overwritten if loading existing stats)
@@ -7792,6 +7920,10 @@
                 // Ensure fouledOut array exists
                 if (!liveGameStats.fouledOut) {
                     liveGameStats.fouledOut = [];
+                }
+                // Ensure substitutions array exists
+                if (!liveGameStats.substitutions) {
+                    liveGameStats.substitutions = [];
                 }
                 // Ensure playByPlay array exists
                 if (!liveGameStats.playByPlay) {
@@ -7850,7 +7982,7 @@
                 updatePeriodDisplay();
                 updateScoreboard();
                 renderOnCourtPlayers();
-                updateTeamNames();
+                await updateTeamNames();
                 renderRosterTab();
             }
 
@@ -7896,7 +8028,8 @@
                 `;
                 
                 item.onclick = () => {
-                    const playerId = parseInt(item.dataset.playerId);
+                    // Keep player IDs as strings (they're stored as "p1", "p2", etc.)
+                    const playerId = item.dataset.playerId;
                     const index = selectedPlayers.indexOf(playerId);
                     
                     if (index > -1) {
@@ -7932,7 +8065,7 @@
             }
         }
 
-        function confirmStartingLineup() {
+        async function confirmStartingLineup() {
             const selectedItems = document.querySelectorAll('.starting-lineup-player-item.selected');
             
             if (selectedItems.length !== 5) {
@@ -7940,7 +8073,8 @@
                 return;
             }
             
-            const selectedPlayerIds = Array.from(selectedItems).map(item => parseInt(item.dataset.playerId));
+            // Keep player IDs as strings (they're stored as "p1", "p2", etc.)
+            const selectedPlayerIds = Array.from(selectedItems).map(item => item.dataset.playerId);
             liveGameStats.onCourt = selectedPlayerIds;
             
             // Close modal
@@ -7950,7 +8084,7 @@
             updatePeriodDisplay();
             updateScoreboard();
             renderOnCourtPlayers();
-            updateTeamNames();
+            await updateTeamNames();
             renderRosterTab();
             
             autoSaveGame();
@@ -7990,7 +8124,7 @@
             document.getElementById('team-main-score').textContent = teamTotal;
         }
 
-        function updateTeamNames() {
+        async function updateTeamNames() {
             const opponentName = currentViewingGame.metadata.opponent || 'Opponent Team';
             document.getElementById('opponent-team-name').textContent = opponentName;
             document.getElementById('opponent-team-header').textContent = opponentName;
@@ -8000,8 +8134,8 @@
             document.getElementById('live-game-title').textContent = gameName;
             
             // Use actual team name
-            const currentTeam = TeamService.getCurrentTeam();
-            const teamName = currentTeam ? currentTeam.teamName : 'Scoring Team';
+            const currentTeam = await TeamService.getCurrentTeam();
+            const teamName = currentTeam ? (currentTeam.teamName || currentTeam.name) : 'Scoring Team';
             document.getElementById('scoring-team-header').textContent = teamName;
             document.getElementById('scoring-team-name').textContent = teamName;
         }
@@ -8014,7 +8148,7 @@
             autoSaveGame();
         }
 
-        function switchStatsTab(tabName) {
+        async function switchStatsTab(tabName) {
             // Update tab buttons
             document.querySelectorAll('.stats-tab').forEach(tab => tab.classList.remove('active'));
             document.getElementById(`${tabName}-tab`).classList.add('active');
@@ -8024,7 +8158,7 @@
             document.getElementById(`${tabName}-tab-content`).classList.add('active');
 
             if (tabName === 'stats') {
-                renderStatsTab();
+                await renderStatsTab();
             } else if (tabName === 'roster') {
                 renderRosterTab();
             } else if (tabName === 'plays') {
@@ -8782,7 +8916,8 @@
                     </div>
                 `;
                 item.onclick = () => {
-                    const playerId = parseInt(item.dataset.playerId);
+                    // Keep player IDs as strings (they're stored as "p1", "p2", etc.)
+                    const playerId = item.dataset.playerId;
                     const index = substitutionSelectedOut.indexOf(playerId);
                     
                     if (index > -1) {
@@ -8833,7 +8968,8 @@
                     </div>
                 `;
                 item.onclick = () => {
-                    const playerId = parseInt(item.dataset.playerId);
+                    // Keep player IDs as strings (they're stored as "p1", "p2", etc.)
+                    const playerId = item.dataset.playerId;
                     const index = substitutionSelectedIn.indexOf(playerId);
                     
                     if (index > -1) {
@@ -8921,12 +9057,25 @@
                 return;
             }
 
+            // Ensure substitutions array exists
+            if (!liveGameStats.substitutions) {
+                liveGameStats.substitutions = [];
+            }
+
+            // Debug logging
+            console.log('Substitution - Selected Out:', substitutionSelectedOut);
+            console.log('Substitution - Selected In:', substitutionSelectedIn);
+            console.log('Substitution - Current onCourt:', liveGameStats.onCourt);
+
             // Update on-court list - replace selected out players with selected in players
             substitutionSelectedOut.forEach((playerOutId, index) => {
                 const playerInId = substitutionSelectedIn[index];
                 const courtIndex = liveGameStats.onCourt.indexOf(playerOutId);
+                console.log(`Looking for player ${playerOutId} in onCourt, found at index:`, courtIndex);
+                
                 if (courtIndex !== -1) {
                     liveGameStats.onCourt[courtIndex] = playerInId;
+                    console.log(`Replaced player at index ${courtIndex}: ${playerOutId} -> ${playerInId}`);
                     
                     // Record substitution
                     liveGameStats.substitutions.push({
@@ -8935,8 +9084,25 @@
                         playerOut: playerOutId,
                         playerIn: playerInId
                     });
+                } else {
+                    // Player not found in onCourt - try to add the new player anyway if we have space
+                    console.warn(`Player ${playerOutId} not found in onCourt array. Current onCourt:`, liveGameStats.onCourt);
+                    // If we have less than 5 players, add the new player
+                    if (liveGameStats.onCourt.length < 5) {
+                        liveGameStats.onCourt.push(playerInId);
+                        console.log(`Added player ${playerInId} to onCourt (now ${liveGameStats.onCourt.length} players)`);
+                        // Record substitution
+                        liveGameStats.substitutions.push({
+                            period: currentPeriod,
+                            time: new Date().toISOString(),
+                            playerOut: playerOutId,
+                            playerIn: playerInId
+                        });
+                    }
                 }
             });
+            
+            console.log('Substitution - Final onCourt:', liveGameStats.onCourt);
 
             // Reset selection state
             substitutionSelectedOut = [];
@@ -8952,12 +9118,27 @@
             const player = roster.find(p => p.id === fouledOutPlayerId);
             const playerName = player ? player.name : 'Player';
             
-            // Pre-select the fouled out player (required, cannot be deselected)
+            // Debug logging
+            console.log('Opening fouled-out substitution modal for player:', fouledOutPlayerId);
+            console.log('Current onCourt:', liveGameStats.onCourt);
+            console.log('Player in onCourt?', liveGameStats.onCourt.includes(fouledOutPlayerId));
+            
+            // Ensure player is still in onCourt (they should be, but verify)
+            if (!liveGameStats.onCourt.includes(fouledOutPlayerId)) {
+                console.warn(`Fouled-out player ${fouledOutPlayerId} is not in onCourt! Adding them back.`);
+                // If they're not in onCourt but should be, add them back
+                if (liveGameStats.onCourt.length < 5) {
+                    liveGameStats.onCourt.push(fouledOutPlayerId);
+                }
+            }
+            
+            // Open the substitution modal first (it will reset the arrays)
+            openSubstitutionDialog();
+            
+            // Immediately restore pre-selection of fouled out player (required, cannot be deselected)
+            // Ensure we use the exact same ID format as stored in onCourt
             substitutionSelectedOut = [fouledOutPlayerId];
             substitutionSelectedIn = [];
-            
-            // Open the substitution modal
-            openSubstitutionDialog();
             
             // Update instruction and lock fouled out player
             setTimeout(() => {
@@ -8973,6 +9154,10 @@
                 const fouledOutItem = outList.querySelector(`[data-player-id="${fouledOutPlayerId}"]`);
                 
                 if (fouledOutItem) {
+                    // Ensure fouled-out player is in the selection array
+                    if (!substitutionSelectedOut.includes(fouledOutPlayerId)) {
+                        substitutionSelectedOut.push(fouledOutPlayerId);
+                    }
                     fouledOutItem.classList.add('selected-out', 'required-substitution');
                     // Disable clicking on fouled out player (they must be subbed out)
                     fouledOutItem.onclick = null;
@@ -8985,16 +9170,19 @@
                             fouledOutText.remove();
                         }
                     }
+                } else {
+                    console.warn(`Fouled-out player item not found for player ID: ${fouledOutPlayerId}`);
                 }
                 
                 // Update click handlers for other "out" players to allow additional selections
                 const outItems = outList.querySelectorAll('.substitution-player-item');
                 outItems.forEach(item => {
-                    const itemPlayerId = parseInt(item.dataset.playerId);
+                    // Keep player IDs as strings (they're stored as "p1", "p2", etc.)
+                    const itemPlayerId = item.dataset.playerId;
                     if (itemPlayerId !== fouledOutPlayerId) {
                         // Re-bind to allow normal multi-select
                         item.onclick = () => {
-                            const playerId = parseInt(item.dataset.playerId);
+                            const playerId = item.dataset.playerId;
                             const index = substitutionSelectedOut.indexOf(playerId);
                             
                             if (index > -1) {
@@ -9048,7 +9236,8 @@
                 const inItems = inList.querySelectorAll('.substitution-player-item');
                 inItems.forEach(item => {
                     item.onclick = () => {
-                        const playerId = parseInt(item.dataset.playerId);
+                        // Keep player IDs as strings (they're stored as "p1", "p2", etc.)
+                        const playerId = item.dataset.playerId;
                         const index = substitutionSelectedIn.indexOf(playerId);
                         
                         if (index > -1) {
@@ -9085,12 +9274,12 @@
             }
         }
 
-        function renderStatsTab() {
-            renderBoxScoreByPeriod();
+        async function renderStatsTab() {
+            await renderBoxScoreByPeriod();
             renderPlayerStatsTable();
         }
 
-        function renderBoxScoreByPeriod() {
+        async function renderBoxScoreByPeriod() {
             const container = document.getElementById('box-score-by-period');
             
             // Calculate totals
@@ -9129,8 +9318,8 @@
             html += '</tr>';
             
             // Scoring Team row
-            const currentTeam = TeamService.getCurrentTeam();
-            const teamName = currentTeam ? currentTeam.teamName : 'Scoring Team';
+            const currentTeam = await TeamService.getCurrentTeam();
+            const teamName = currentTeam ? (currentTeam.teamName || currentTeam.name) : 'Scoring Team';
             html += '<tr class="box-score-team-row">';
             html += `<td class="box-score-team-name">${escapeHtml(teamName)}</td>`;
             for (let p = 1; p <= 4; p++) {
@@ -10518,7 +10707,7 @@
 
         async function renderPlaytimeHistory(gamesOverride = null) {
             // Check current team sport
-            const currentTeam = TeamService.getCurrentTeam();
+            const currentTeam = await TeamService.getCurrentTeam();
             if (!currentTeam) {
                 const container = document.getElementById('playtime-history-container');
                 if (container) {
@@ -10528,7 +10717,7 @@
             }
             
             // Show placeholder for Lacrosse
-            if (currentTeam.sport.toLowerCase() === 'lacrosse') {
+            if (currentTeam.sport && currentTeam.sport.toLowerCase() === 'lacrosse') {
                 const container = document.getElementById('playtime-history-container');
                 if (container) {
                     container.innerHTML = `
@@ -11156,13 +11345,13 @@
             restoreBlueDevilsRoster();
             
             // Check if we have a current team selected
-            const currentTeam = TeamService.getCurrentTeam();
+            const currentTeam = await TeamService.getCurrentTeam();
             if (!currentTeam) {
                 // No team selected, show team selection page
                 navigateTo('team-selection-page');
             } else {
                 // Team selected, show team info page as default
-                updateTeamDisplay();
+                await updateTeamDisplay();
                 await loadRoster();
                 navigateTo('team-info-page');
             }
