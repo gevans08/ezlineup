@@ -2309,6 +2309,200 @@
             min-height: calc(100vh - 200px);
         }
 
+        /* Mobile optimizations for Live Stats page - iPhone and small screens */
+        @media (max-width: 480px) and (max-height: 900px) {
+            /* Reduce header padding */
+            .game-title-bar {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+
+            .hamburger-menu-btn {
+                width: 36px;
+                height: 36px;
+                padding: 8px;
+                margin-right: 8px;
+            }
+
+            .hamburger-menu-btn span {
+                width: 20px;
+                height: 3px;
+            }
+
+            /* Reduce nav row padding */
+            .live-stats-nav-row {
+                padding: 8px 12px;
+            }
+
+            .exit-stats-btn {
+                font-size: 0.9rem;
+                padding: 3px 0;
+            }
+
+            /* Compact scoreboard */
+            .simplified-scoreboard {
+                padding: 8px 12px;
+            }
+
+            .scoreboard-team-left,
+            .scoreboard-team-right {
+                font-size: 0.85rem;
+            }
+
+            .main-score-simple {
+                font-size: 1.8rem;
+            }
+
+            /* Compact tabs */
+            .stats-tabs {
+                padding: 0;
+            }
+
+            .stats-tab {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+
+            /* Reduce tab content padding */
+            .stats-tab-content {
+                padding: 12px;
+            }
+
+            /* Compact team action sections */
+            .team-actions-section {
+                margin-bottom: 15px;
+            }
+
+            .team-actions-header {
+                padding: 8px 12px;
+                margin-bottom: 10px;
+                font-size: 0.9rem;
+            }
+
+            .basketball-icon-small {
+                font-size: 0.9rem;
+            }
+
+            /* Reduce button padding */
+            .action-btn {
+                padding: 10px 8px;
+                font-size: 0.8rem;
+                border-radius: 10px;
+            }
+
+            .action-btn-large {
+                padding: 16px 12px;
+                font-size: 0.95rem;
+                border-radius: 12px;
+            }
+
+            .action-btn-medium {
+                padding: 14px 12px;
+                font-size: 0.9rem;
+                border-radius: 11px;
+            }
+
+            .action-btn-small {
+                padding: 8px 6px;
+                font-size: 0.75rem;
+                border-radius: 8px;
+            }
+
+            /* Reduce grid gaps */
+            .action-buttons-grid {
+                gap: 6px;
+            }
+
+            .opponent-actions {
+                padding: 10px;
+                gap: 6px;
+            }
+
+            .scoring-actions {
+                gap: 8px;
+            }
+
+            .scoring-team-section {
+                padding: 10px;
+            }
+
+            .action-column-left,
+            .action-column-right,
+            .action-column-center {
+                gap: 6px;
+            }
+
+            .action-grid-small {
+                gap: 6px;
+            }
+
+            /* Reduce period selector size */
+            .period-selector-btn {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+
+            .period-icon {
+                font-size: 0.9rem;
+            }
+
+            /* Compact on-court players section */
+            .on-court-players {
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+
+            .on-court-player {
+                gap: 3px;
+            }
+
+            .player-number {
+                font-size: 1.1rem;
+            }
+
+            .player-name-small {
+                font-size: 0.65rem;
+                max-width: 70px;
+            }
+
+            .foul-badge {
+                padding: 3px 8px;
+                font-size: 0.7rem;
+            }
+
+            /* Compact substitution button */
+            .substitution-btn,
+            .sub-btn {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+
+            .swap-players-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 1rem;
+            }
+
+            /* Ensure substitutions section is visible */
+            #scoring-tab-content {
+                padding-bottom: 80px; /* Add space at bottom for substitutions */
+            }
+
+            /* Compact on-court section */
+            .on-court-section {
+                margin-top: 10px;
+            }
+
+            .on-court-header {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+
+            .player-count {
+                font-size: 0.85rem;
+            }
+        }
+
         .stats-tab-content.active {
             display: block;
         }
