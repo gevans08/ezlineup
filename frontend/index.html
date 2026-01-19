@@ -2466,6 +2466,21 @@
                 font-size: 0.75rem;
             }
 
+            /* Make scoring buttons square - ensure combined height doesn't exceed block/foul section */
+            .fg-2pt-btn-large,
+            .miss-2pt-btn-large,
+            .fg-3pt-btn-large,
+            .miss-3pt-btn-large {
+                height: 48px;
+                aspect-ratio: 1;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.85rem;
+                flex-shrink: 0;
+            }
+
             /* Reduce grid gaps - moderate spacing */
             .action-buttons-grid {
                 gap: 8px;
@@ -2518,17 +2533,10 @@
                 gap: 7px;
             }
 
-            /* Make block and foul buttons on home team side square and vertically bigger */
-            .block-btn-small,
-            .foul-btn-small {
-                height: 48px;
-                aspect-ratio: 1;
-                padding: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 0.8rem;
-                flex-shrink: 0;
+            /* Ensure scoring button columns match height of center column */
+            .action-column-left,
+            .action-column-right {
+                justify-content: flex-start;
             }
 
             #live-stats-page.scoring-tab-active .action-grid-small {
