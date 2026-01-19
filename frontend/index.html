@@ -4180,7 +4180,6 @@
             <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
                 <button class="generate-btn" onclick="generateLineup()">Generate Lineup</button>
                 <button class="generate-btn" id="keep-stats-btn" onclick="startStatsOnlyGame()" style="background: #28a745;">📊 Keep Stats</button>
-                <button class="generate-btn" onclick="createTestGame()" style="background: #6c757d; border: 2px dashed #004E89;">🧪 Test Game</button>
             </div>
             <div id="error-message" class="error-message"></div>
 
@@ -6446,19 +6445,15 @@
                 // Hide buttons
                 const generateBtn = document.querySelector('.generate-btn');
                 const keepStatsBtn = document.getElementById('keep-stats-btn');
-                const testBtn = document.querySelector('.generate-btn[onclick="createTestGame()"]');
                 if (generateBtn) generateBtn.style.display = 'none';
                 if (keepStatsBtn) keepStatsBtn.style.display = 'none';
-                if (testBtn) testBtn.style.display = 'none';
                 return;
             } else {
                 // Show buttons for basketball
                 const generateBtn = document.querySelector('.generate-btn');
                 const keepStatsBtn = document.getElementById('keep-stats-btn');
-                const testBtn = document.querySelector('.generate-btn[onclick="createTestGame()"]');
                 if (generateBtn) generateBtn.style.display = '';
                 if (keepStatsBtn) keepStatsBtn.style.display = '';
-                if (testBtn) testBtn.style.display = '';
             }
             
             // Continue with normal basketball roster rendering
