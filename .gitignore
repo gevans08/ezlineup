@@ -29,3 +29,6 @@ npm-debug.log*
 
 # Local Cloudflare D1 database
 .mf/
+
+# Vercel local project metadata
+.vercel/
